@@ -1,0 +1,30 @@
+{
+    "name": "dopri",
+    "version": "0.0.1",
+    "description": "Dormand–Prince methods",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "test": "mocha -r ts-node/register tests/**/test-*.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/mrc-ide/dopri-ts.git"
+    },
+    "author": "Rich FitzJohn <rich.fitzjohn@gmail.com>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/mrc-ide/dopri-ts/issues"
+    },
+    "homepage": "https://github.com/mrc-ide/dopri-ts#readme",
+    "devDependencies": {
+        "@types/chai": "^4.1.6",
+        "@types/mocha": "^5.2.5",
+        "chai": "^4.2.0",
+        "mocha": "^5.2.0",
+        "nyc": "^13.0.1",
+        "ts-node": "^7.0.1",
+        "typescript": "^3.1.1"
+    }
+}
