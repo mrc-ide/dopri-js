@@ -129,23 +129,27 @@ export class dopri5 implements types.stepper {
                          E5 * k5[i] + E6 * k6[i] + E7 * k2[i]);
         }
         this.n_eval += 6;
-        this.t = t;
-        this.h = h;
     }
 
-    save_history() : void {
+    step_complete(t: number, h: number) : void {
+        this.save_history(t, h);
+        utils.copy_array(this.k1, this.k2);
+        utils.copy_array(this.y, this.y_next);
+    }
+
+    save_history(t: number, h: number) : void {
         let history = this.history;
         const n = this.n;
         for (var i = 0; i < n; ++i) {
             let ydiff = this.y_next[i] - this.y[i];
-            let bspl = this.h * this.k1[i] - ydiff;
+            let bspl = h * this.k1[i] - ydiff;
             history[             i] = this.y[i];
             history[    n + i] = ydiff;
             history[2 * n + i] = bspl;
-            history[3 * n + i] = -this.h * this.k2[i] + ydiff - bspl;
+            history[3 * n + i] = -h * this.k2[i] + ydiff - bspl;
         }
-        history[this.order * n    ] = this.t;
-        history[this.order * n + 1] = this.h;
+        history[this.order * n    ] = t;
+        history[this.order * n + 1] = h;
     }
 
     error(atol: number, rtol : number) : number {
@@ -160,9 +164,11 @@ export class dopri5 implements types.stepper {
     }
 
     interpolate(t: number) : number[] {
-        let theta = (t - this.t) / this.h;
-        let theta1 = 1 - theta;
         const n = this.n;
+        let t_step = this.history[this.order * n    ];
+        let h_step = this.history[this.order * n + 1];
+        let theta = (t - t_step) / h_step;
+        let theta1 = 1 - theta;
 
         var ret = new Array<number>(n);
         for (var i = 0; i < n; ++i) {
@@ -176,16 +182,16 @@ export class dopri5 implements types.stepper {
         return ret;
     }
 
-    is_stiff() : boolean {
+    is_stiff(h: number) : boolean {
         var stnum = 0.0, stden = 0.0;
         for (var i = 0; i < this.n; ++i) {
             stnum += utils.square(this.k2[i] - this.k6[i]);
             stden += utils.square(this.y_next[i] - this.y_stiff[i]);
         }
-        return stden > 0 && Math.abs(this.h) * Math.sqrt(stnum / stden) > 3.25;
+        return stden > 0 && Math.abs(h) * Math.sqrt(stnum / stden) > 3.25;
     }
 
-    initial_step_size(atol: number, rtol: number) : number {
+    initial_step_size(t: number, atol: number, rtol: number) : number {
         const step_size_max = this.step_control.size_max;
         // NOTE: This is destructive with respect to most of the information
         // in the dataect; in particular k2, k3 will be modified.
@@ -208,7 +214,7 @@ export class dopri5 implements types.stepper {
         for (i = 0; i < this.n; ++i) {
             y1[i] = this.y[i] + h * f0[i];
         }
-        this.rhs(this.t + h, y1, f1);
+        this.rhs(t + h, y1, f1);
         this.n_eval++;
 
         // Estimate the second derivative of the solution:
@@ -230,12 +236,11 @@ export class dopri5 implements types.stepper {
     }
 
     reset(y: number[]): void {
-        this.t = 0;
-        this.h = 0;
         this.n_eval = 0;
         for (var i = 0; i < this.n; ++i) {
             this.y[i] = y[i];
         }
+        this.n_eval = 0;
     }
 
     readonly rhs: types.rhs_fn;
@@ -259,10 +264,6 @@ export class dopri5 implements types.stepper {
     k6: number[];
 
     history: number[];
-
-    // Last step size and origin
-    t: number = 0.0;
-    h: number = 0;
 
     n_eval: number = 0;
 };

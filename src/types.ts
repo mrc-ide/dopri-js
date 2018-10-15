@@ -15,11 +15,13 @@ export interface dopri_step_control {
 
 export interface stepper {
     step(t: number, h: number) : void;
-    save_history() : void;
+    step_complete(t: number, h: number) : void;
+
+    save_history(t: number, h: number) : void;
     error(atol: number, rtol: number) : number;
     interpolate(t: number) : number[];
-    is_stiff() : boolean;
-    initial_step_size(atol: number, rtol: number) : number;
+    is_stiff(t: number) : boolean;
+    initial_step_size(t: number, atol: number, rtol: number) : number;
     reset(y: number[]) : void;
 
     readonly n: number;
