@@ -10,6 +10,7 @@ const STEP_FACTOR_MIN = 1e-4;
 export class dopri {
     constructor(rhs: types.rhs_fn, n: number) {
         this.stepper = new dopri5.dopri5(rhs, n);
+        this.reset();
     }
 
     initialise(t: number, y: number[]) : dopri {
@@ -31,6 +32,9 @@ export class dopri {
     step() {
         var t = this.t, h = this.h;
         var success = false, reject = false;
+        var fac_old = 1e-4;
+        let step_control = this.stepper.step_control;
+
         while (!success) {
             if (this.n_steps > this.max_steps) {
                 throw "too many steps";
@@ -49,6 +53,10 @@ export class dopri {
             // Error estimation
             let err = this.stepper.error(this.atol, this.rtol);
 
+            let fac11 = err**step_control.constant;
+            let facc1 = 1.0 / step_control.factor_min;
+            let facc2 = 1.0 / step_control.factor_max;
+
             if (err <= 1) {
                 success = true;
                 this.n_steps_accepted++;
@@ -56,15 +64,19 @@ export class dopri {
 
                 this.stepper.step_complete(t, h);
 
-                let h_new = this.next_step_size(h, err);
+                var fac = fac11 / fac_old**step_control.beta;
+                fac = Math.max(facc2,
+                               Math.min(facc1,
+                                        fac / step_control.factor_safe));
+                let h_new = h / fac;
+                // and here we have it - fac_old is last error!
+                fac_old = Math.max(err, 1e-4);
 
                 this.t += h
                 this.h = reject ? Math.min(h_new, h) : h_new;
             } else {
                 reject = true;
-                let step_control = this.stepper.step_control;
-                let fac11 = Math.pow(err, step_control.constant);
-                let h_new = h / Math.min(1 / step_control.factor_min,
+                let h_new = h / Math.min(facc1,
                                          fac11 / step_control.factor_safe);
                 if (this.n_steps_accepted >= 1) {
                     this.n_steps_rejected++;
@@ -73,20 +85,6 @@ export class dopri {
             }
         }
         return this.t;
-    }
-
-    // This section really needs comparison with the original Fortran;
-    next_step_size(h: number, err: number) : number {
-        let fac_old = Math.max(err, STEP_FACTOR_MIN);
-        let step_control = this.stepper.step_control;
-        let fac11 = Math.pow(err, step_control.constant);
-        // Lund-stabilisation
-        var fac = fac11 / Math.pow(fac_old, step_control.beta);
-        fac = utils.constrain(fac / step_control.factor_safe,
-                              1.0 / step_control.factor_max,
-                              1.0 / step_control.factor_min)
-        let h_new = h / fac;
-        return Math.min(h_new, step_control.size_max);
     }
 
     stepper: dopri5.dopri5;

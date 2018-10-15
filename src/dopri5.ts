@@ -41,7 +41,7 @@ const D6 = -1453857185.0 / 822651844.0;
 const D7 = 69997945.0 / 29380423.0;
 
 
-export class dopri5_step_control implements types.dopri_step_control {
+class dopri5_step_control implements types.dopri_step_control {
     // Essentially unlimited step size
     readonly size_min = 1e-8; // should be Number.EPSILON, really
     readonly size_max = Number.MAX_VALUE;
@@ -78,7 +78,7 @@ export class dopri5 implements types.stepper {
         const n = this.n;
 
         let y = this.y;
-        let y1 = this.y_next;
+        let y_next = this.y_next;
         let k1 = this.k1;
         let k2 = this.k2;
         let k3 = this.k3;
@@ -89,22 +89,22 @@ export class dopri5 implements types.stepper {
 
         var i = 0;
         for (i = 0; i < n; ++i) { // 22
-            y1[i] = y[i] + h * A21 * k1[i];
+            y_next[i] = y[i] + h * A21 * k1[i];
         }
-        this.rhs(t + C2 * h, y1, k2);
+        this.rhs(t + C2 * h, y_next, k2);
         for (i = 0; i < n; ++i) { // 23
-            y1[i] = y[i] + h * (A31 * k1[i] + A32 * k2[i]);
+            y_next[i] = y[i] + h * (A31 * k1[i] + A32 * k2[i]);
         }
-        this.rhs(t + C3 * h, y1, k3);
+        this.rhs(t + C3 * h, y_next, k3);
         for (i = 0; i < n; ++i) { // 24
-            y1[i] = y[i] + h * (A41 * k1[i] + A42 * k2[i] + A43 * k3[i]);
+            y_next[i] = y[i] + h * (A41 * k1[i] + A42 * k2[i] + A43 * k3[i]);
         }
-        this.rhs(t + C4 * h, y1, k4);
+        this.rhs(t + C4 * h, y_next, k4);
         for (i = 0; i < n; ++i) { // 25
-            y1[i] = y[i] + h * (A51 * k1[i] + A52 * k2[i] + A53 * k3[i] +
-                                A54 * k4[i]);
+            y_next[i] = y[i] + h * (A51 * k1[i] + A52 * k2[i] + A53 * k3[i] +
+                                    A54 * k4[i]);
         }
-        this.rhs(t + C5 * h, y1, k5);
+        this.rhs(t + C5 * h, y_next, k5);
         for (i = 0; i < n; ++i) { // 26
             this.y_stiff[i] = y[i] + h * (A61 * k1[i] + A62 * k2[i] +
                                           A63 * k3[i] + A64 * k4[i] +
@@ -113,10 +113,10 @@ export class dopri5 implements types.stepper {
         const t_next = t + h;
         this.rhs(t_next, this.y_stiff, k6);
         for (i = 0; i < n; ++i) { // 27
-            y1[i] = y[i] + h * (A71 * k1[i] + A73 * k3[i] + A74 * k4[i] +
-                                A75 * k5[i] + A76 * k6[i]);
+            y_next[i] = y[i] + h * (A71 * k1[i] + A73 * k3[i] + A74 * k4[i] +
+                                    A75 * k5[i] + A76 * k6[i]);
         }
-        this.rhs(t_next, y1, k2);
+        this.rhs(t_next, y_next, k2);
 
         var j = 4 * n;
         for (i = 0; i < n; ++i) {
@@ -133,8 +133,8 @@ export class dopri5 implements types.stepper {
 
     step_complete(t: number, h: number) : void {
         this.save_history(t, h);
-        utils.copy_array(this.k1, this.k2);
-        utils.copy_array(this.y, this.y_next);
+        utils.copy_array(this.k1, this.k2);    // k1 <== k2
+        utils.copy_array(this.y, this.y_next); // y  <== y_next
     }
 
     save_history(t: number, h: number) : void {
@@ -200,6 +200,9 @@ export class dopri5 implements types.stepper {
         // Compute a first guess for explicit Euler as
         //   h = 0.01 * norm (y0) / norm (f0)
         // the increment for explicit euler is small compared to the solution
+        this.rhs(t, this.y, f0);
+        this.n_eval++;
+
         var norm_f = 0.0, norm_y = 0.0, i = 0;
         for (i = 0; i < this.n; ++i) {
             let sk = atol + rtol * Math.abs(this.y[i]);
