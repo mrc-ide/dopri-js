@@ -87,6 +87,12 @@ export class dopri {
         return this.t;
     }
 
+    // The interface here _will_ change at some point.  But this is
+    // useful for a really basic csv output at the moment.
+    state() {
+        return [this.t].concat(this.stepper.y);
+    }
+
     stepper: dopri5.dopri5;
     t: number = 0.0;
     h: number = 0.0;
