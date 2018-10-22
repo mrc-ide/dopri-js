@@ -1,5 +1,7 @@
 import * as fs from "fs";
 
+const SQRT_DBL_EPSILON = Math.sqrt(2**(-52));
+
 export function square(x: number) : number{
     return x * x;
 }
@@ -34,4 +36,37 @@ export function write_csv(arr: Array<number[]>, path: string) : void {
         if(err) {
             return console.log(err);
         }
-    });}
+    });
+}
+
+
+export function approx_equal(x: number, y: number,
+                             tolerance = SQRT_DBL_EPSILON) {
+    var xy = Math.abs(x - y);
+    const xn = Math.abs(x);
+    if (xn > tolerance) {
+        xy /= xn;
+    }
+    return xy < tolerance
+}
+
+
+export function approx_equal_array(x: number[], y: number[],
+                            tolerance = SQRT_DBL_EPSILON) {
+    // It's possible that there is a way of doing a two-array map here
+    // but I can't easily find it.  This has the nice property of
+    // short-circuiting at least.
+    //
+    // It's quite possible that we should preserve a common scale here
+    // as that's what the R version does - compute the mean absolute
+    // value of 'x' then use that as 'xn' in the above calculations.
+    if (y.length != x.length) {
+        throw "Incompatible arrays";
+    }
+    for (var i = 0; i < x.length; ++i) {
+        if (!approx_equal(x[i], y[i], tolerance)) {
+            return false;
+        }
+    }
+    return true;
+}
