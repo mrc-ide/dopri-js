@@ -70,3 +70,14 @@ export function approx_equal_array(x: number[], y: number[],
     }
     return true;
 }
+
+
+export function seq_len(a: number, b: number, len: number) : number[] {
+    const d = (a - b) / (len - 1);
+    const ret = [];
+    for (var i = 0; i < len; ++i) {
+        const p = i / (len - 1);
+        ret.push((1 - p) * a + p * b);
+    }
+    return ret;
+}
