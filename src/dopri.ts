@@ -27,12 +27,13 @@ export class dopri {
         this.n_steps_rejected = 0;
         this.stiff_n_stiff = 0;
         this.stiff_n_nonstiff = 0;
+        this.last_error = 0;
     }
 
     step() {
         var t = this.t, h = this.h;
         var success = false, reject = false;
-        var fac_old = 1e-4;
+        var fac_old = Math.max(this.last_error, 1e-4);
         let step_control = this.stepper.step_control;
 
         while (!success) {
@@ -69,11 +70,10 @@ export class dopri {
                                Math.min(facc1,
                                         fac / step_control.factor_safe));
                 let h_new = h / fac;
-                // and here we have it - fac_old is last error!
-                fac_old = Math.max(err, 1e-4);
 
                 this.t += h
                 this.h = reject ? Math.min(h_new, h) : h_new;
+                this.last_error = err;
             } else {
                 reject = true;
                 let h_new = h / Math.min(facc1,
@@ -105,6 +105,7 @@ export class dopri {
     stiff_check: number  = 0;
     stiff_n_stiff: number = 0;
     stiff_n_nonstiff: number = 0;
+    last_error: number = 0;
 
     // Stuff to tune
     max_steps: number = 10000;
