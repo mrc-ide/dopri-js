@@ -8,6 +8,14 @@ import * as interpolator from "./interpolator";
 const DBL_EPSILON = 2**(-52); // = 2.220446049250313e-16
 const STEP_FACTOR_MIN = 1e-4;
 
+export function integrate(rhs: types.rhs_fn, y: number[],
+                          t0: number, t1: number) {
+    const solver = new dopri(rhs, y.length);
+    solver.initialise(t0, y);
+    return solver.run(t1);
+}
+
+
 export class dopri {
     constructor(rhs: types.rhs_fn, n: number) {
         this.stepper = new dopri5.dopri5(rhs, n);
