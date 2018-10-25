@@ -2,6 +2,7 @@ import * as types from "./types";
 // until interface constructor is done
 import * as dopri5 from "./dopri5";
 import * as utils from "./utils";
+import * as interpolator from "./interpolator";
 
 // needed for ES5 - will be ~= Number.EPSILON in ES6
 const DBL_EPSILON = 2**(-52); // = 2.220446049250313e-16
@@ -14,8 +15,6 @@ export class dopri {
     }
 
     initialise(t: number, y: number[]) : dopri {
-        // why does both the the stepper and the integrator need to
-        // know the time?
         this.stepper.reset(y);
         this.h = this.stepper.initial_step_size(t, this.atol, this.rtol);
         return this;
@@ -85,6 +84,15 @@ export class dopri {
             }
         }
         return this.t;
+    }
+
+    run(t: number) {
+        var ret = new interpolator.interpolator(this.stepper);
+        while (this.t < t) {
+            this.step();
+            ret.add(this.stepper.history);
+        }
+        return (t: number[]) => ret.interpolate(t);
     }
 
     // The interface here _will_ change at some point.  But this is

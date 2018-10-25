@@ -163,21 +163,23 @@ export class dopri5 implements types.stepper {
         return Math.sqrt(err / this.n);
     }
 
-    interpolate(t: number) : number[] {
+    // It might be worth doing an optional argument history and then
+    // pulling in this.history if it's not present
+    interpolate(t: number, history: number[]) : number[] {
         const n = this.n;
-        let t_step = this.history[this.order * n    ];
-        let h_step = this.history[this.order * n + 1];
+        let t_step = history[this.order * n    ];
+        let h_step = history[this.order * n + 1];
         let theta = (t - t_step) / h_step;
         let theta1 = 1 - theta;
 
         var ret = new Array<number>(n);
         for (var i = 0; i < n; ++i) {
             ret[i] =
-                this.history[i] + theta *
-                (this.history[n + i] + theta1 *
-                 (this.history[2 * n + i] + theta *
-                  (this.history[3 * n + i] + theta1 *
-                   this.history[4 * n + i])));
+                history[i] + theta *
+                (history[n + i] + theta1 *
+                 (history[2 * n + i] + theta *
+                  (history[3 * n + i] + theta1 *
+                   history[4 * n + i])));
         }
         return ret;
     }

@@ -19,7 +19,7 @@ export interface stepper {
 
     save_history(t: number, h: number) : void;
     error(atol: number, rtol: number) : number;
-    interpolate(t: number) : number[];
+    interpolate(t: number, history: number[]) : number[];
     is_stiff(t: number) : boolean;
     initial_step_size(t: number, atol: number, rtol: number) : number;
     reset(y: number[]) : void;
