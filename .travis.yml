@@ -3,3 +3,6 @@ node_js:
   - 10
 before_script:
   - npm run-script build
+  - npm install codecov -g
+after_success:
+  - codecov -f coverage/*.json
