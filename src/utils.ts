@@ -47,28 +47,34 @@ export function approx_equal(x: number, y: number,
     if (xn > tolerance) {
         xy /= xn;
     }
-    return xy < tolerance
+    return xy < tolerance;
 }
 
 
 export function approx_equal_array(x: number[], y: number[],
-                            tolerance = SQRT_DBL_EPSILON) {
-    // It's possible that there is a way of doing a two-array map here
-    // but I can't easily find it.  This has the nice property of
-    // short-circuiting at least.
-    //
-    // It's quite possible that we should preserve a common scale here
-    // as that's what the R version does - compute the mean absolute
-    // value of 'x' then use that as 'xn' in the above calculations.
+                                   tolerance = SQRT_DBL_EPSILON) {
     if (y.length != x.length) {
         throw "Incompatible arrays";
     }
+    var scale = 0, xy = 0, n = 0;
     for (var i = 0; i < x.length; ++i) {
-        if (!approx_equal(x[i], y[i], tolerance)) {
-            return false;
+        if (x[i] != y[i]) {
+            scale += Math.abs(x[i]);
+            xy += Math.abs(x[i] - y[i]);
+            n++;
         }
     }
-    return true;
+    if (n == 0) {
+        return true;
+    }
+
+    scale /= n;
+    xy /= n;
+
+    if (scale > tolerance) {
+        xy /= scale;
+    }
+    return xy < tolerance;
 }
 
 
