@@ -50,13 +50,13 @@ export class dopri {
 
         while (!success) {
             if (this.n_steps > this.max_steps) {
-                throw "too many steps";
+                throw integration_error("too many steps", t);
             }
             if (h < this.stepper.step_control.size_min) {
-                throw "step too small";
+                throw integration_error("step too small", t);
             }
             if (h <= Math.abs(t) * DBL_EPSILON) {
-                throw "step size vanished";
+                throw integration_error("step size vanished", t);
             }
 
             // Carry out the step
