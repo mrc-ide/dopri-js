@@ -7,6 +7,7 @@ export function square(x: number) : number{
 }
 
 
+// constrain x to lie in [min, max]
 export function constrain(x: number, min: number, max: number) : number {
     return Math.max(Math.min(x, max), min);
 }
@@ -26,17 +27,6 @@ export function zeros(n: number) : number[] {
         ret[i] = 0.0;
     }
     return ret;
-}
-
-
-// need to install node types for this to work...
-export function write_csv(arr: Array<number[]>, path: string) : void {
-    var str = arr.map(x => x.join(',') + '\n').join('');
-    fs.writeFile(path, str, function(err) {
-        if(err) {
-            return console.log(err);
-        }
-    });
 }
 
 
@@ -86,4 +76,9 @@ export function seq_len(a: number, b: number, len: number) : number[] {
         ret.push((1 - p) * a + p * b);
     }
     return ret;
+}
+
+
+export function last<T>(x: Array<T>): T {
+    return x[x.length - 1];
 }

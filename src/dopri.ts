@@ -61,7 +61,7 @@ export class dopri {
             // Error estimation
             let err = this.stepper.error(this.atol, this.rtol);
 
-            let fac11 = err**step_control.constant;
+            let fac11 = Math.pow(err, step_control.constant);
             let facc1 = 1.0 / step_control.factor_min;
             let facc2 = 1.0 / step_control.factor_max;
 
@@ -73,22 +73,20 @@ export class dopri {
                 this.stepper.step_complete(t, h);
 
                 var fac = fac11 / fac_old**step_control.beta;
-                fac = Math.max(facc2,
-                               Math.min(facc1,
-                                        fac / step_control.factor_safe));
+                fac = utils.constrain(fac / step_control.factor_safe,
+                                      facc2, facc1)
                 let h_new = h / fac;
 
                 this.t += h
+                // this.h = (reject && fac > 1) ? h else h / fac
                 this.h = reject ? Math.min(h_new, h) : h_new;
                 this.last_error = err;
             } else {
                 reject = true;
-                let h_new = h / Math.min(facc1,
-                                         fac11 / step_control.factor_safe);
                 if (this.n_steps_accepted >= 1) {
                     this.n_steps_rejected++;
                 }
-                h = h_new;
+                h /= Math.min(facc1, fac11 / step_control.factor_safe);
             }
         }
         return this.t;
@@ -103,11 +101,6 @@ export class dopri {
         return (t: number[]) => ret.interpolate(t);
     }
 
-    // The interface here _will_ change at some point.  But this is
-    // useful for a really basic csv output at the moment.
-    state() {
-        return [this.t].concat(this.stepper.y);
-    }
 
     stepper: dopri5.dopri5;
     t: number = 0.0;

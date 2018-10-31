@@ -231,7 +231,7 @@ export class dopri5 implements types.stepper {
         der2 = Math.sqrt(der2) / h;
 
         // Step size is computed such that
-        //   h^order * Math.max(norm(f0), norm(der2)) = 0.01
+        //   h^order * max(norm(f0), norm(der2)) = 0.01
         var der12 = Math.max(Math.abs(der2), Math.sqrt(norm_f));
         var h1 = (der12 <= 1e-15) ?
             Math.max(1e-6, Math.abs(h) * 1e-3) :
