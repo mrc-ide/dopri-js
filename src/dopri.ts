@@ -16,6 +16,11 @@ export function integrate(rhs: types.rhs_fn, y: number[],
 }
 
 
+function integration_error(message: string, t: number) {
+    return new Error(`Integration failure: ${message} at ${t}`);
+}
+
+
 export class dopri {
     constructor(rhs: types.rhs_fn, n: number) {
         this.stepper = new dopri5.dopri5(rhs, n);
@@ -70,7 +75,7 @@ export class dopri {
                 this.n_steps_accepted++;
 
                 if (this.is_stiff(h)) {
-                    throw "Integration failure: problem became stiff";
+                    throw integration_error("problem became stiff", t);
                 }
 
                 this.stepper.step_complete(t, h);

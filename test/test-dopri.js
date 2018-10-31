@@ -92,3 +92,16 @@ describe('integrate lorenz', () => {
             to.eql(false);
     });
 });
+
+
+describe('stiff systems', () => {
+    it('can detect stiff problems', () => {
+        var delta = 0.001;
+        var y0 = [delta];
+        var t1 = 2 / delta;
+        var solver = new dopri.dopri(examples.flame_rhs, 1);
+        solver.initialise(0, y0);
+        solver.stiff_check = 1;
+        expect(() => solver.run(t1)).to.throw("problem became stiff");
+    });
+});

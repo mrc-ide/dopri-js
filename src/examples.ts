@@ -49,3 +49,9 @@ export function lorenz_rhs() {
         dydt[2] = -b * y3 + y1 * y2;
     }
 }
+
+
+// https://www.mathworks.com/company/newsletters/articles/stiff-differential-equations.html
+export function flame_rhs(t: number, y: number[], dydt: number[]) {
+    dydt[0] = y[0]**2 - y[0]**3;
+}
