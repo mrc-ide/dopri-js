@@ -68,7 +68,10 @@ export class dopri {
             if (err <= 1) {
                 success = true;
                 this.n_steps_accepted++;
-                // TODO: Add stiffness check here.
+
+                if (this.is_stiff(h)) {
+                    throw "Integration failure: problem became stiff";
+                }
 
                 this.stepper.step_complete(t, h);
 
@@ -92,6 +95,25 @@ export class dopri {
         return this.t;
     }
 
+    is_stiff(h: number) {
+        var ret = false;
+        const check = this.stiff_n_stiff > 0 ||
+            this.n_steps_accepted % this.stiff_check == 0;
+        if (check) {
+            if (this.stepper.is_stiff(h)) {
+                this.stiff_n_nonstiff = 0;
+                if (this.stiff_n_stiff++ >= 15) {
+                    ret = true;
+                }
+            } else if (this.stiff_n_stiff > 0) {
+                if (this.stiff_n_nonstiff++ >= 6) {
+                    this.stiff_n_stiff = 0;
+                }
+            }
+        }
+        return ret;
+    }
+
     run(t: number) {
         var ret = new interpolator.interpolator(this.stepper);
         while (this.t < t) {
@@ -111,7 +133,6 @@ export class dopri {
     n_steps_accepted: number = 0;
     n_steps_rejected: number = 0;
 
-    stiff_check: number  = 0;
     stiff_n_stiff: number = 0;
     stiff_n_nonstiff: number = 0;
     last_error: number = 0;
@@ -120,4 +141,5 @@ export class dopri {
     max_steps: number = 10000;
     atol: number = 1e-6;
     rtol: number = 1e-6;
+    stiff_check: number = 0;
 }
