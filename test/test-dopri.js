@@ -143,12 +143,6 @@ describe('stiff systems', () => {
 
 describe('reset stiff check', () => {
     it('can detect stiff problems', () => {
-        var fs = require('fs');
-        var expect = require('chai').expect;
-        var dopri = require('../dist/dopri.js');
-        var examples = require('../dist/examples.js');
-        var utils = require("../dist/utils.js");
-
         var solver = new dopri.dopri(examples.exponential_rhs([0.5]), 1);
         solver.initialise(0, [0.1]);
         solver.run(10);
