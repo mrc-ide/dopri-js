@@ -30,6 +30,7 @@ export class dopri {
     initialise(t: number, y: number[]) : dopri {
         this.stepper.reset(y);
         this.h = this.stepper.initial_step_size(t, this.atol, this.rtol);
+        this.t = t;
         return this;
     }
 
@@ -113,6 +114,7 @@ export class dopri {
             } else if (this.stiff_n_stiff > 0) {
                 if (this.stiff_n_nonstiff++ >= 6) {
                     this.stiff_n_stiff = 0;
+                    this.stiff_n_nonstiff = 0;
                 }
             }
         }

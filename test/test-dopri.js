@@ -94,6 +94,40 @@ describe('integrate lorenz', () => {
 });
 
 
+describe('Exceed max steps', () => {
+    it('Throws when max steps exceeded', () => {
+        var solver = new dopri.dopri(examples.flame_rhs, 1);
+        solver.initialise(0, [0.1]);
+        solver.max_steps = 5;
+        expect(() => solver.run(100)).to.throw("too many steps");
+    });
+});
+
+
+describe('Step size too small', () => {
+    it('Throws when max steps exceeded', () => {
+        var solver = new dopri.dopri(examples.flame_rhs, 1);
+        solver.initialise(0, [0.1]);
+        solver.stepper.step_control.size_min = 0.1;
+        expect(() => solver.run(100)).to.throw("step too small");
+    });
+});
+
+
+describe('Step size vanished', () => {
+    it('Throws when max steps exceeded', () => {
+        var solver = new dopri.dopri(examples.exponential_rhs([0.5]), 1);
+        var h = solver.stepper.step_control.size_min;
+
+        solver.initialise(h / 2**(-52), [0.1]);
+        solver.h = h;
+        expect(() => solver.step()).to.throw("step size vanished");
+        solver.h = 2 * h;
+        expect(() => solver.step()).to.not.throw();
+    });
+});
+
+
 describe('stiff systems', () => {
     it('can detect stiff problems', () => {
         var delta = 0.001;
@@ -103,5 +137,30 @@ describe('stiff systems', () => {
         solver.initialise(0, y0);
         solver.stiff_check = 1;
         expect(() => solver.run(t1)).to.throw("problem became stiff");
+    });
+});
+
+
+describe('reset stiff check', () => {
+    it('can detect stiff problems', () => {
+        var fs = require('fs');
+        var expect = require('chai').expect;
+        var dopri = require('../dist/dopri.js');
+        var examples = require('../dist/examples.js');
+        var utils = require("../dist/utils.js");
+
+        var solver = new dopri.dopri(examples.exponential_rhs([0.5]), 1);
+        solver.initialise(0, [0.1]);
+        solver.run(10);
+
+        solver.stiff_check = 1;
+        solver.stiff_n_stiff = 3;
+        for (var i = 0; i < 6; ++i) {
+            solver.step();
+            expect(solver.stiff_n_nonstiff).to.eql(i + 1);
+        }
+        solver.step();
+        expect(solver.stiff_n_stiff).to.eql(0);
+        expect(solver.stiff_n_nonstiff).to.eql(0);
     });
 });
