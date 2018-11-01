@@ -1,152 +1,150 @@
-import * as types from "./types";
-// until interface constructor is done
 import * as dopri5 from "./dopri5";
-import * as utils from "./utils";
 import * as interpolator from "./interpolator";
+import * as types from "./types";
+import * as utils from "./utils";
 
 // needed for ES5 - will be ~= Number.EPSILON in ES6
-const DBL_EPSILON = 2**(-52); // = 2.220446049250313e-16
+const DBL_EPSILON = Math.pow(2, -52); // = 2.220446049250313e-16
 const STEP_FACTOR_MIN = 1e-4;
 
-export function integrate(rhs: types.rhs_fn, y: number[],
+export function integrate(rhs: types.RhsFn, y: number[],
                           t0: number, t1: number) {
-    const solver = new dopri(rhs, y.length);
+    const solver = new Dopri(rhs, y.length);
     solver.initialise(t0, y);
     return solver.run(t1);
 }
 
-
-function integration_error(message: string, t: number) {
+function integrationError(message: string, t: number) {
     return new Error(`Integration failure: ${message} at ${t}`);
 }
 
+export class Dopri {
+    // public stepper: types.Stepper;
+    public stepper: dopri5.Dopri5;
+    public t: number = 0.0;
+    public h: number = 0.0;
 
-export class dopri {
-    constructor(rhs: types.rhs_fn, n: number) {
-        this.stepper = new dopri5.dopri5(rhs, n);
+    // state
+    public nSteps: number = 0;
+    public nStepsAccepted: number = 0;
+    public nStepsRejected: number = 0;
+
+    public stiffNStiff: number = 0;
+    public stiffNNonstiff: number = 0;
+    public lastError: number = 0;
+
+    // Stuff to tune
+    public maxSteps: number = 10000;
+    public atol: number = 1e-6;
+    public rtol: number = 1e-6;
+    public stiffCheck: number = 0;
+
+    constructor(rhs: types.RhsFn, n: number) {
+        this.stepper = new dopri5.Dopri5(rhs, n);
         this.reset();
     }
 
-    initialise(t: number, y: number[]) : dopri {
+    public initialise(t: number, y: number[]): Dopri {
         this.stepper.reset(y);
-        this.h = this.stepper.initial_step_size(t, this.atol, this.rtol);
+        this.h = this.stepper.initialStepSize(t, this.atol, this.rtol);
         this.t = t;
         return this;
     }
 
-    reset() {
-        this.n_steps = 0;
-        this.n_steps_accepted = 0;
-        this.n_steps_rejected = 0;
-        this.stiff_n_stiff = 0;
-        this.stiff_n_nonstiff = 0;
-        this.last_error = 0;
+    public reset() {
+        this.nSteps = 0;
+        this.nStepsAccepted = 0;
+        this.nStepsRejected = 0;
+        this.stiffNStiff = 0;
+        this.stiffNNonstiff = 0;
+        this.lastError = 0;
     }
 
-    step() {
-        var t = this.t, h = this.h;
-        var success = false, reject = false;
-        var fac_old = Math.max(this.last_error, 1e-4);
-        let step_control = this.stepper.step_control;
+    public step() {
+        const t = this.t;
+        let h = this.h;
+        let success = false;
+        let reject = false;
+        const facOld = Math.max(this.lastError, 1e-4);
+        const stepControl = this.stepper.stepControl;
 
         while (!success) {
-            if (this.n_steps > this.max_steps) {
-                throw integration_error("too many steps", t);
+            if (this.nSteps > this.maxSteps) {
+                throw integrationError("too many steps", t);
             }
-            if (h < this.stepper.step_control.size_min) {
-                throw integration_error("step too small", t);
+            if (h < this.stepper.stepControl.sizeMin) {
+                throw integrationError("step too small", t);
             }
             if (h <= Math.abs(t) * DBL_EPSILON) {
-                throw integration_error("step size vanished", t);
+                throw integrationError("step size vanished", t);
             }
 
             // Carry out the step
             this.stepper.step(t, h);
-            this.n_steps++;
+            this.nSteps++;
 
             // Error estimation
-            let err = this.stepper.error(this.atol, this.rtol);
+            const err = this.stepper.error(this.atol, this.rtol);
 
-            let fac11 = Math.pow(err, step_control.constant);
-            let facc1 = 1.0 / step_control.factor_min;
-            let facc2 = 1.0 / step_control.factor_max;
+            const fac11 = Math.pow(err, stepControl.constant);
+            const facc1 = 1.0 / stepControl.factorMin;
+            const facc2 = 1.0 / stepControl.factorMax;
 
             if (err <= 1) {
                 success = true;
-                this.n_steps_accepted++;
+                this.nStepsAccepted++;
 
-                if (this.is_stiff(h)) {
-                    throw integration_error("problem became stiff", t);
+                if (this.isStiff(h)) {
+                    throw integrationError("problem became stiff", t);
                 }
 
-                this.stepper.step_complete(t, h);
+                this.stepper.stepComplete(t, h);
 
-                var fac = fac11 / fac_old**step_control.beta;
-                fac = utils.constrain(fac / step_control.factor_safe,
-                                      facc2, facc1)
-                let h_new = h / fac;
+                let fac = fac11 / Math.pow(facOld, stepControl.beta);
+                fac = utils.constrain(fac / stepControl.factorSafe,
+                                      facc2, facc1);
+                const hNew = h / fac;
 
-                this.t += h
+                this.t += h;
                 // this.h = (reject && fac > 1) ? h else h / fac
-                this.h = reject ? Math.min(h_new, h) : h_new;
-                this.last_error = err;
+                this.h = reject ? Math.min(hNew, h) : hNew;
+                this.lastError = err;
             } else {
                 reject = true;
-                if (this.n_steps_accepted >= 1) {
-                    this.n_steps_rejected++;
+                if (this.nStepsAccepted >= 1) {
+                    this.nStepsRejected++;
                 }
-                h /= Math.min(facc1, fac11 / step_control.factor_safe);
+                h /= Math.min(facc1, fac11 / stepControl.factorSafe);
             }
         }
         return this.t;
     }
 
-    is_stiff(h: number) {
-        var ret = false;
-        const check = this.stiff_n_stiff > 0 ||
-            this.n_steps_accepted % this.stiff_check == 0;
+    public isStiff(h: number) {
+        const check = this.stiffNStiff > 0 ||
+            this.nStepsAccepted % this.stiffCheck === 0;
         if (check) {
-            if (this.stepper.is_stiff(h)) {
-                this.stiff_n_nonstiff = 0;
-                if (this.stiff_n_stiff++ >= 15) {
-                    ret = true;
+            if (this.stepper.isStiff(h)) {
+                this.stiffNNonstiff = 0;
+                if (this.stiffNStiff++ >= 15) {
+                    return true;
                 }
-            } else if (this.stiff_n_stiff > 0) {
-                if (this.stiff_n_nonstiff++ >= 6) {
-                    this.stiff_n_stiff = 0;
-                    this.stiff_n_nonstiff = 0;
+            } else if (this.stiffNStiff > 0) {
+                if (this.stiffNNonstiff++ >= 6) {
+                    this.stiffNStiff = 0;
+                    this.stiffNNonstiff = 0;
                 }
             }
         }
-        return ret;
+        return false;
     }
 
-    run(t: number) {
-        var ret = new interpolator.interpolator(this.stepper);
-        while (this.t < t) {
+    public run(tEnd: number) {
+        const ret = new interpolator.Interpolator(this.stepper);
+        while (this.t < tEnd) {
             this.step();
             ret.add(this.stepper.history);
         }
         return (t: number[]) => ret.interpolate(t);
     }
-
-
-    stepper: dopri5.dopri5;
-    t: number = 0.0;
-    h: number = 0.0;
-
-    // state
-    n_steps: number = 0;
-    n_steps_accepted: number = 0;
-    n_steps_rejected: number = 0;
-
-    stiff_n_stiff: number = 0;
-    stiff_n_nonstiff: number = 0;
-    last_error: number = 0;
-
-    // Stuff to tune
-    max_steps: number = 10000;
-    atol: number = 1e-6;
-    rtol: number = 1e-6;
-    stiff_check: number = 0;
 }

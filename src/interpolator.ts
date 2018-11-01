@@ -12,18 +12,21 @@ import * as types from "./types";
 // This is going to need some work if we ever want to support
 // extending a history and continuing.
 
-export class interpolator {
-    constructor(stepper: types.stepper) {
+export class Interpolator {
+    public readonly stepper: types.Stepper;
+    public history: number[][];
+
+    constructor(stepper: types.Stepper) {
         this.stepper = stepper;
         this.history = [];
     }
 
-    add(h: number[]) {
+    public add(h: number[]) {
         this.history.push(h.slice(0));
     }
 
-    interpolate(t: number[]) {
-        var y: number[][] = [];
+    public interpolate(t: number[]) {
+        const y: number[][] = [];
         // TODO: validate that 't' is increasing and fits within
         // integration time.
 
@@ -45,9 +48,8 @@ export class interpolator {
         // TODO: don't allow anything to happen with a zero-length
         // history.
         const it = h[0].length - 2;
-        var i = 0;
-        for (var j = 0; j < t.length; ++j) {
-            var tj = t[j];
+        let i = 0;
+        for (const tj of t) {
             // This bit of calculation is not that nice - we're better
             // off holding both start and end times than doing this.
             while (h[i][it] + h[i][it + 1] < tj) {
@@ -57,7 +59,4 @@ export class interpolator {
         }
         return y;
     }
-
-    readonly stepper: types.stepper;
-    history: number[][];
 }

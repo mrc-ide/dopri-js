@@ -7,10 +7,10 @@ describe('lorenz function', () => {
     it('is correct with known cases', () => {
         const y = [10.0, 1.0, 1.0];
         const dy = [0,0,0];
-        var lorenz = examples.lorenz_rhs();
+        var lorenz = examples.lorenzRhs();
         lorenz(0, y, dy);
         // This seems hard to get right:
         var ref = [-90.0, 269.0, 22 / 3];
-        expect(utils.approx_equal_array(dy, ref)).to.eql(true);
+        expect(utils.approxEqualArray(dy, ref)).to.eql(true);
     });
 });

@@ -7,6 +7,7 @@
     "scripts": {
         "build": "tsc",
         "test": "nyc mocha",
+        "lint": "tslint -c tslint.json 'src/**/*.ts'",
         "posttest": "nyc report --reporter=json"
     },
     "repository": {
@@ -27,6 +28,7 @@
         "mocha": "^5.2.0",
         "nyc": "^13.0.1",
         "ts-node": "^7.0.1",
+        "tslint": "^5.11.0",
         "typescript": "^3.1.1"
     },
     "dependencies": {}
