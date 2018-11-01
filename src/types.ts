@@ -3,6 +3,7 @@
 export type RhsFn = (t: number, y: number[], dy: number[]) => void;
 
 export interface DopriStepControl {
+    beta: number;
     sizeMin: number;
     sizeMax: number;
     factorSafe: number;
@@ -16,6 +17,7 @@ export interface Stepper {
     readonly order: number;
     readonly yNext: number[];
     readonly stepControl: DopriStepControl;
+    history: number[];
 
     step(t: number, h: number): void;
     stepComplete(t: number, h: number): void;

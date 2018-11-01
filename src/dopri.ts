@@ -1,6 +1,6 @@
 import * as dopri5 from "./dopri5/stepper";
 import * as interpolator from "./interpolator";
-import {RhsFn} from "./types";
+import {RhsFn, Stepper} from "./types";
 import * as utils from "./utils";
 
 // needed for ES5 - will be ~= Number.EPSILON in ES6
@@ -19,8 +19,7 @@ function integrationError(message: string, t: number) {
 }
 
 export class Dopri {
-    // public stepper: types.Stepper;
-    public stepper: dopri5.Dopri5;
+    public stepper: Stepper;
     public t: number = 0.0;
     public h: number = 0.0;
 
