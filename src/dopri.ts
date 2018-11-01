@@ -1,13 +1,13 @@
 import * as dopri5 from "./dopri5/stepper";
 import * as interpolator from "./interpolator";
-import * as types from "./types";
+import {RhsFn} from "./types";
 import * as utils from "./utils";
 
 // needed for ES5 - will be ~= Number.EPSILON in ES6
 const DBL_EPSILON = Math.pow(2, -52); // = 2.220446049250313e-16
 const STEP_FACTOR_MIN = 1e-4;
 
-export function integrate(rhs: types.RhsFn, y: number[],
+export function integrate(rhs: RhsFn, y: number[],
                           t0: number, t1: number) {
     const solver = new Dopri(rhs, y.length);
     solver.initialise(t0, y);
@@ -39,7 +39,7 @@ export class Dopri {
     public rtol: number = 1e-6;
     public stiffCheck: number = 0;
 
-    constructor(rhs: types.RhsFn, n: number) {
+    constructor(rhs: RhsFn, n: number) {
         this.stepper = new dopri5.Dopri5(rhs, n);
         this.reset();
     }

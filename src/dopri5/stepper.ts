@@ -1,6 +1,7 @@
-import * as types from "../types";
 import * as utils from "../utils";
 import * as control from "./control";
+
+import {RhsFn, Stepper} from "../types";
 
 // Heaps of constants!
 const C2 = 0.2;
@@ -42,8 +43,8 @@ const D6 = -1453857185.0 / 822651844.0;
 const D7 = 69997945.0 / 29380423.0;
 
 // This is what we actually want
-export class Dopri5 implements types.Stepper {
-    public readonly rhs: types.RhsFn;
+export class Dopri5 implements Stepper {
+    public readonly rhs: RhsFn;
     public readonly n: number;
     public readonly order: number = 5;
     public readonly stepControl = new control.Dopri5StepControl();
@@ -67,7 +68,7 @@ export class Dopri5 implements types.Stepper {
 
     public nEval: number = 0;
 
-    constructor(rhs: types.RhsFn, n: number) {
+    constructor(rhs: RhsFn, n: number) {
         this.rhs = rhs;
         this.n = n;
 

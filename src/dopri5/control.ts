@@ -1,6 +1,6 @@
-import * as types from "../types";
+import {DopriStepControl} from "../types";
 
-export class Dopri5StepControl implements types.DopriStepControl {
+export class Dopri5StepControl implements DopriStepControl {
     // Essentially unlimited step size
     public readonly sizeMin = 1e-8; // should be Number.EPSILON, really
     public readonly sizeMax = Number.MAX_VALUE;

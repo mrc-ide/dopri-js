@@ -1,4 +1,4 @@
-import * as types from "./types";
+import {Stepper} from "./types";
 
 // We could take either a stepper or the interpolation function here.
 // The advantage of the former is that we can sensibly implement
@@ -13,10 +13,10 @@ import * as types from "./types";
 // extending a history and continuing.
 
 export class Interpolator {
-    public readonly stepper: types.Stepper;
+    public readonly stepper: Stepper;
     public history: number[][];
 
-    constructor(stepper: types.Stepper) {
+    constructor(stepper: Stepper) {
         this.stepper = stepper;
         this.history = [];
     }
