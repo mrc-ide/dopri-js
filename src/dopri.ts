@@ -1,4 +1,4 @@
-import * as dopri5 from "./dopri5";
+import * as dopri5 from "./dopri5/stepper";
 import * as interpolator from "./interpolator";
 import * as types from "./types";
 import * as utils from "./utils";

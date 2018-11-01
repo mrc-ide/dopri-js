@@ -1,5 +1,6 @@
-import * as types from "./types";
-import * as utils from "./utils";
+import * as types from "../types";
+import * as utils from "../utils";
+import * as control from "./control";
 
 // Heaps of constants!
 const C2 = 0.2;
@@ -40,24 +41,12 @@ const D5 = 701980252875.0 / 199316789632.0;
 const D6 = -1453857185.0 / 822651844.0;
 const D7 = 69997945.0 / 29380423.0;
 
-class Dopri5StepControl implements types.DopriStepControl {
-    // Essentially unlimited step size
-    public readonly sizeMin = 1e-8; // should be Number.EPSILON, really
-    public readonly sizeMax = Number.MAX_VALUE;
-    // For scaling during adaptive stepping
-    public readonly factorSafe = 0.9;
-    public readonly factorMin = 0.2;  // from dopri5.f:276, retard.f:328
-    public readonly factorMax = 10.0; // from dopri5.f:281, retard.f:333
-    public readonly beta = 0.04;
-    public readonly constant = 0.2 - this.beta * 0.75;
-}
-
 // This is what we actually want
 export class Dopri5 implements types.Stepper {
     public readonly rhs: types.RhsFn;
     public readonly n: number;
     public readonly order: number = 5;
-    public readonly stepControl = new Dopri5StepControl();
+    public readonly stepControl = new control.Dopri5StepControl();
 
     // The variables at the beginning of the step
     public y: number[];
