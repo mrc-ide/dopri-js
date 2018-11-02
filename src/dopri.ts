@@ -150,4 +150,15 @@ export class Dopri {
         }
         return (t: number[]) => ret.interpolate(t);
     }
+
+    public statistics() {
+        return {
+            nEval: this.stepper.nEval,
+            nSteps: this.nSteps,
+            nStepsAccepted: this.nStepsAccepted,
+            nStepsRejected: this.nStepsRejected,
+            stiffNNonstiff: this.stiffNNonstiff,
+            stiffNStiff: this.stiffNStiff,
+        };
+    }
 }

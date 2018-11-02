@@ -169,3 +169,41 @@ describe('reset stiff check', () => {
         expect(solver.stiffNNonstiff).to.eql(0);
     });
 });
+
+
+describe('statistics', () => {
+    var solver = new dopri.Dopri(examples.lorenzRhs(), 3);
+
+    it('is zeroed at first', () => {
+        var stats = solver.statistics();
+        // All zerod:
+        expect(stats.nEval).to.eql(0);
+        expect(stats.nSteps).to.eql(0);
+        expect(stats.nStepsAccepted).to.eql(0);
+        expect(stats.nStepsRejected).to.eql(0);
+        expect(stats.stiffNNonstiff).to.eql(0);
+        expect(stats.stiffNStiff).to.eql(0);
+    });
+
+    it('is all zeroed except nEval after initialisation', () => {
+        solver.initialise(0, [10, 1, 1]);
+        var stats = solver.statistics();
+        expect(stats.nEval).to.eql(2);
+        expect(stats.nSteps).to.eql(0);
+        expect(stats.nStepsAccepted).to.eql(0);
+        expect(stats.nStepsRejected).to.eql(0);
+        expect(stats.stiffNNonstiff).to.eql(0);
+        expect(stats.stiffNStiff).to.eql(0);
+    });
+
+    it('is all over the show after running', () => {
+        solver.run(10);
+        var stats = solver.statistics();
+        expect(stats.nEval).to.eql(2090);
+        expect(stats.nSteps).to.eql(348);
+        expect(stats.nStepsAccepted).to.eql(340);
+        expect(stats.nStepsRejected).to.eql(8);
+        expect(stats.stiffNNonstiff).to.eql(0);
+        expect(stats.stiffNStiff).to.eql(0);
+    });
+});

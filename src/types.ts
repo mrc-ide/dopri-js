@@ -18,6 +18,7 @@ export interface Stepper {
     readonly yNext: number[];
     readonly stepControl: DopriStepControl;
     history: number[];
+    nEval: number;
 
     step(t: number, h: number): void;
     stepComplete(t: number, h: number): void;
