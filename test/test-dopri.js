@@ -159,14 +159,14 @@ describe('reset stiff check', () => {
         solver.run(10);
 
         solver.stiffCheck = 1;
-        solver.stiffNStiff = 3;
+        solver._stiffNStiff = 3;
         for (var i = 0; i < 6; ++i) {
             solver.step();
-            expect(solver.stiffNNonstiff).to.eql(i + 1);
+            expect(solver.statistics().stiffNNonstiff).to.eql(i + 1);
         }
         solver.step();
-        expect(solver.stiffNStiff).to.eql(0);
-        expect(solver.stiffNNonstiff).to.eql(0);
+        expect(solver.statistics().stiffNStiff).to.eql(0);
+        expect(solver.statistics().stiffNNonstiff).to.eql(0);
     });
 });
 

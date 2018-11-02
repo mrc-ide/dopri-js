@@ -23,20 +23,20 @@ export class Dopri {
     public t: number = 0.0;
     public h: number = 0.0;
 
-    // state
-    public nSteps: number = 0;
-    public nStepsAccepted: number = 0;
-    public nStepsRejected: number = 0;
-
-    public stiffNStiff: number = 0;
-    public stiffNNonstiff: number = 0;
-    public lastError: number = 0;
-
     // Stuff to tune
     public maxSteps: number = 10000;
     public atol: number = 1e-6;
     public rtol: number = 1e-6;
     public stiffCheck: number = 0;
+
+    // state
+    private _nSteps: number = 0;
+    private _nStepsAccepted: number = 0;
+    private _nStepsRejected: number = 0;
+
+    private _stiffNStiff: number = 0;
+    private _stiffNNonstiff: number = 0;
+    private _lastError: number = 0;
 
     constructor(rhs: RhsFn, n: number) {
         this.stepper = new dopri5.Dopri5(rhs, n);
@@ -55,12 +55,12 @@ export class Dopri {
     }
 
     public reset() {
-        this.nSteps = 0;
-        this.nStepsAccepted = 0;
-        this.nStepsRejected = 0;
-        this.stiffNStiff = 0;
-        this.stiffNNonstiff = 0;
-        this.lastError = 0;
+        this._nSteps = 0;
+        this._nStepsAccepted = 0;
+        this._nStepsRejected = 0;
+        this._stiffNStiff = 0;
+        this._stiffNNonstiff = 0;
+        this._lastError = 0;
     }
 
     public step() {
@@ -68,11 +68,11 @@ export class Dopri {
         let h = this.h;
         let success = false;
         let reject = false;
-        const facOld = Math.max(this.lastError, 1e-4);
+        const facOld = Math.max(this._lastError, 1e-4);
         const stepControl = this.stepper.stepControl;
 
         while (!success) {
-            if (this.nSteps > this.maxSteps) {
+            if (this._nSteps > this.maxSteps) {
                 throw integrationError("too many steps", t);
             }
             if (h < this.stepper.stepControl.sizeMin) {
@@ -84,7 +84,7 @@ export class Dopri {
 
             // Carry out the step
             this.stepper.step(t, h);
-            this.nSteps++;
+            this._nSteps++;
 
             // Error estimation
             const err = this.stepper.error(this.atol, this.rtol);
@@ -95,7 +95,7 @@ export class Dopri {
 
             if (err <= 1) {
                 success = true;
-                this.nStepsAccepted++;
+                this._nStepsAccepted++;
 
                 if (this.isStiff(h)) {
                     throw integrationError("problem became stiff", t);
@@ -111,11 +111,11 @@ export class Dopri {
                 this.t += h;
                 // this.h = (reject && fac > 1) ? h else h / fac
                 this.h = reject ? Math.min(hNew, h) : hNew;
-                this.lastError = err;
+                this._lastError = err;
             } else {
                 reject = true;
-                if (this.nStepsAccepted >= 1) {
-                    this.nStepsRejected++;
+                if (this._nStepsAccepted >= 1) {
+                    this._nStepsRejected++;
                 }
                 h /= Math.min(facc1, fac11 / stepControl.factorSafe);
             }
@@ -124,18 +124,18 @@ export class Dopri {
     }
 
     public isStiff(h: number) {
-        const check = this.stiffNStiff > 0 ||
-            this.nStepsAccepted % this.stiffCheck === 0;
+        const check = this._stiffNStiff > 0 ||
+            this._nStepsAccepted % this.stiffCheck === 0;
         if (check) {
             if (this.stepper.isStiff(h)) {
-                this.stiffNNonstiff = 0;
-                if (this.stiffNStiff++ >= 15) {
+                this._stiffNNonstiff = 0;
+                if (this._stiffNStiff++ >= 15) {
                     return true;
                 }
-            } else if (this.stiffNStiff > 0) {
-                if (this.stiffNNonstiff++ >= 6) {
-                    this.stiffNStiff = 0;
-                    this.stiffNNonstiff = 0;
+            } else if (this._stiffNStiff > 0) {
+                if (this._stiffNNonstiff++ >= 6) {
+                    this._stiffNStiff = 0;
+                    this._stiffNNonstiff = 0;
                 }
             }
         }
@@ -153,12 +153,13 @@ export class Dopri {
 
     public statistics() {
         return {
+            lastError: this._lastError,
             nEval: this.stepper.nEval,
-            nSteps: this.nSteps,
-            nStepsAccepted: this.nStepsAccepted,
-            nStepsRejected: this.nStepsRejected,
-            stiffNNonstiff: this.stiffNNonstiff,
-            stiffNStiff: this.stiffNStiff,
+            nSteps: this._nSteps,
+            nStepsAccepted: this._nStepsAccepted,
+            nStepsRejected: this._nStepsRejected,
+            stiffNNonstiff: this._stiffNNonstiff,
+            stiffNStiff: this._stiffNStiff,
         };
     }
 }

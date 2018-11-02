@@ -42,7 +42,9 @@ const D5 = 701980252875.0 / 199316789632.0;
 const D6 = -1453857185.0 / 822651844.0;
 const D7 = 69997945.0 / 29380423.0;
 
-// This is what we actually want
+// most of this can be made really quit private - everything not used
+// in the interface really.
+
 export class Dopri5 implements Stepper {
     public readonly rhs: RhsFn;
     public readonly n: number;
