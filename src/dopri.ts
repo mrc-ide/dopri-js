@@ -43,6 +43,10 @@ export class Dopri {
     }
 
     public initialise(t: number, y: number[]): Dopri {
+        const n = this.stepper.n;
+        if (y.length !== n) {
+            throw Error(`Invalid size 'y' - expected a length ${n} array`);
+        }
         this.stepper.reset(y);
         this.reset();
         this.h = this.stepper.initialStepSize(t, this.atol, this.rtol);

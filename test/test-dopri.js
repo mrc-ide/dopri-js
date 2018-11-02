@@ -5,6 +5,17 @@ var dopri = require('../dist/dopri.js');
 var examples = require('../dist/examples.js');
 var utils = require("../dist/utils.js");
 
+describe('validate initial conditions', () => {
+    var solver = new dopri.Dopri(examples.lorenzRhs(), 3);
+    it ('rejects invalid input', () => {
+        expect(() => { solver.initialise(0, [1]); }).to.throw(
+            "Invalid size 'y' - expected a length 3 array");
+    });
+    it ('accepts valid input', () => {
+        expect(() => { solver.initialise(0, [1, 1, 1]); }).to.not.throw();
+    });
+});
+
 describe('integrate exponential', () => {
     it ('works for 1d problems', () => {
         var y0 = [1];
