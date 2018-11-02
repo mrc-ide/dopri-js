@@ -40,11 +40,11 @@ export class Dopri {
 
     constructor(rhs: RhsFn, n: number) {
         this.stepper = new dopri5.Dopri5(rhs, n);
-        this.reset();
     }
 
     public initialise(t: number, y: number[]): Dopri {
         this.stepper.reset(y);
+        this.reset();
         this.h = this.stepper.initialStepSize(t, this.atol, this.rtol);
         this.t = t;
         return this;

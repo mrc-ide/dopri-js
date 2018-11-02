@@ -258,7 +258,6 @@ export class Dopri5 implements Stepper {
     }
 
     public reset(y: number[]): void {
-        this.nEval = 0;
         for (let i = 0; i < this.n; ++i) {
             this.y[i] = y[i];
         }
