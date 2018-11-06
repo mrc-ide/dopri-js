@@ -1,6 +1,7 @@
 import * as dopri5 from "./dopri5/stepper";
 import * as interpolator from "./interpolator";
 import {Integrator, RhsFn, Stepper} from "./types";
+import {dopriControl, DopriControl} from "./control";
 import * as utils from "./utils";
 
 // needed for ES5 - will be ~= Number.EPSILON in ES6
@@ -23,11 +24,7 @@ export class Dopri implements Integrator {
     public t: number = 0.0;
     public h: number = 0.0;
 
-    // Stuff to tune
-    public maxSteps: number = 10000;
-    public atol: number = 1e-6;
-    public rtol: number = 1e-6;
-    public stiffCheck: number = 0;
+    public readonly control: DopriControl;
 
     // state
     private _nSteps: number = 0;
@@ -38,8 +35,9 @@ export class Dopri implements Integrator {
     private _stiffNNonstiff: number = 0;
     private _lastError: number = 0;
 
-    constructor(rhs: RhsFn, n: number) {
+    constructor(rhs: RhsFn, n: number, control = dopriControl({})) {
         this.stepper = new dopri5.Dopri5(rhs, n);
+        this.control = control;
     }
 
     public initialise(t: number, y: number[]): Dopri {
@@ -49,7 +47,8 @@ export class Dopri implements Integrator {
         }
         this.stepper.reset(y);
         this.reset();
-        this.h = this.stepper.initialStepSize(t, this.atol, this.rtol);
+        this.h = this.stepper.initialStepSize(t, this.control.atol,
+                                              this.control.rtol);
         this.t = t;
         return this;
     }
@@ -72,7 +71,7 @@ export class Dopri implements Integrator {
         const stepControl = this.stepper.stepControl;
 
         while (!success) {
-            if (this._nSteps > this.maxSteps) {
+            if (this._nSteps > this.control.maxSteps) {
                 throw integrationError("too many steps", t);
             }
             if (h < this.stepper.stepControl.sizeMin) {
@@ -87,7 +86,8 @@ export class Dopri implements Integrator {
             this._nSteps++;
 
             // Error estimation
-            const err = this.stepper.error(this.atol, this.rtol);
+            const err = this.stepper.error(this.control.atol,
+                                           this.control.rtol);
 
             const fac11 = Math.pow(err, stepControl.constant);
             const facc1 = 1.0 / stepControl.factorMin;
@@ -125,7 +125,7 @@ export class Dopri implements Integrator {
 
     public isStiff(h: number) {
         const check = this._stiffNStiff > 0 ||
-            this._nStepsAccepted % this.stiffCheck === 0;
+            this._nStepsAccepted % this.control.stiffCheck === 0;
         if (check) {
             if (this.stepper.isStiff(h)) {
                 this._stiffNNonstiff = 0;
