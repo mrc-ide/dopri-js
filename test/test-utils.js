@@ -37,6 +37,11 @@ describe('approximately equal', () => {
         expect(utils.approxEqual(Math.PI, 355/113)).to.eql(false);
         expect(utils.approxEqual(Math.PI, 355/113, 1e-7)).to.eql(true);
     });
+
+    it ('works for very small numbers', () => {
+        expect(utils.approxEqual(1e-10, 1e-10)).to.eql(true);
+        expect(utils.approxEqual(1e-10, 1e-11)).to.eql(true);
+    });
 });
 
 

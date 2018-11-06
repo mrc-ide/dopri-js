@@ -44,6 +44,16 @@ describe('integrate exponential', () => {
         expect(utils.approxEqualArray(
             y1.map(el => el[2]), y2.map(el => el[2]), 3e-6)).to.eql(true);
     });
+
+    it ('works for zero derivatives', () => {
+        var y0 = [0];
+        var r = [0];
+        var t = utils.seqLen(0, 25, 101);
+        var sol = dopri.integrate(examples.exponentialRhs(r), y0, 0, 25);
+        var y1 = sol(t);
+        var y2 = examples.exponentialSolution(r, y0, t);
+        expect(utils.approxEqualArray(y1, y2, 1e-6)).to.eql(true);
+    });
 });
 
 
