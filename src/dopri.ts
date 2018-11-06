@@ -129,8 +129,6 @@ export class Dopri implements Integrator {
                 const hNew = h / fac;
 
                 this._t += h;
-                // TODO:
-                // this._h = (reject && fac > 1) ? h else h / fac
                 this._h = reject ? Math.min(hNew, h) : hNew;
                 this._lastError = err;
             } else {
