@@ -218,3 +218,16 @@ describe('statistics', () => {
         expect(stats.stiffNStiff).to.eql(0);
     });
 });
+
+
+describe('details', () => {
+    it('only reject after first successful step', () => {
+        var solver = new dopri.Dopri(examples.lorenzRhs(), 3);
+        solver.initialise(0, [1, 2, 3]);
+        solver._h = 10;
+        solver._step();
+        var s = solver.statistics();
+        expect(s.nStepsAccepted).to.eql(1);
+        expect(s.nStepsRejected).to.eql(0);
+    });
+});
