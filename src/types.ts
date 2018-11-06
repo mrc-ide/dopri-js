@@ -33,7 +33,6 @@ export interface Stepper {
 
 export interface Integrator {
     initialise(t: number, y: number[]): Integrator;
-    step(): number;
     run(tEnd: number): (t: number[]) => number[][];
     statistics(): object;
 }

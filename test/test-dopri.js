@@ -120,7 +120,7 @@ describe('Step size too small', () => {
     it('Throws when max steps exceeded', () => {
         var solver = new dopri.Dopri(examples.flameRhs, 1);
         solver.initialise(0, [0.1]);
-        solver.stepper.stepControl.sizeMin = 0.1;
+        solver._stepper.stepControl.sizeMin = 0.1;
         expect(() => solver.run(100)).to.throw("step too small");
     });
 });
@@ -129,13 +129,13 @@ describe('Step size too small', () => {
 describe('Step size vanished', () => {
     it('Throws when max steps exceeded', () => {
         var solver = new dopri.Dopri(examples.exponentialRhs([0.5]), 1);
-        var h = solver.stepper.stepControl.sizeMin;
+        var h = solver._stepper.stepControl.sizeMin;
 
         solver.initialise(h / 2**(-52), [0.1]);
-        solver.h = h;
-        expect(() => solver.step()).to.throw("step size vanished");
-        solver.h = 2 * h;
-        expect(() => solver.step()).to.not.throw();
+        solver._h = h;
+        expect(() => solver._step()).to.throw("step size vanished");
+        solver._h = 2 * h;
+        expect(() => solver._step()).to.not.throw();
     });
 });
 
@@ -162,10 +162,10 @@ describe('reset stiff check', () => {
         solver.stiffCheck = 1;
         solver._stiffNStiff = 3;
         for (var i = 0; i < 6; ++i) {
-            solver.step();
+            solver._step();
             expect(solver.statistics().stiffNNonstiff).to.eql(i + 1);
         }
-        solver.step();
+        solver._step();
         expect(solver.statistics().stiffNStiff).to.eql(0);
         expect(solver.statistics().stiffNNonstiff).to.eql(0);
     });
