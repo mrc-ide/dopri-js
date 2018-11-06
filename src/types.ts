@@ -1,4 +1,4 @@
-// This should go into an "ambient module" I believe
+import * as interpolator from "./interpolator";
 
 export type RhsFn = (t: number, y: number[], dy: number[]) => void;
 
@@ -29,4 +29,11 @@ export interface Stepper {
     isStiff(t: number): boolean;
     initialStepSize(t: number, atol: number, rtol: number): number;
     reset(y: number[]): void;
+}
+
+export interface Integrator {
+    initialise(t: number, y: number[]): Integrator;
+    step(): number;
+    run(tEnd: number): (t: number[]) => number[][];
+    statistics(): object;
 }
