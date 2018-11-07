@@ -1,7 +1,6 @@
 'use strict';
 var fs = require('fs');
 var expect = require('chai').expect;
-var control = require('../lib/control.js');
 var dopri = require('../lib/dopri.js');
 var examples = require('../lib/examples.js');
 var utils = require("../lib/utils.js");
@@ -118,7 +117,7 @@ describe('integrate lorenz', () => {
 
 describe('Exceed max steps', () => {
     it('Throws when max steps exceeded', () => {
-        var ctl = control.dopriControl({maxSteps: 5});
+        var ctl = {maxSteps: 5};
         var solver = new dopri.Dopri(examples.flameRhs, 1, ctl);
         solver.initialise(0, [0.1]);
         expect(() => solver.run(100)).to.throw("too many steps");
@@ -155,7 +154,7 @@ describe('stiff systems', () => {
         var delta = 0.001;
         var y0 = [delta];
         var t1 = 2 / delta;
-        var ctl = control.dopriControl({stiffCheck: 1});
+        var ctl = {stiffCheck: 1};
         var solver = new dopri.Dopri(examples.flameRhs, 1, ctl);
         solver.initialise(0, y0);
         expect(() => solver.run(t1)).to.throw("problem became stiff");

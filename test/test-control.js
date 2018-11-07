@@ -5,8 +5,11 @@ var control = require("../lib/control.js");
 
 describe("control parameters", () => {
     it("has sensible defaults", () => {
-        var x = control.dopriControl({});
+        var x = control.dopriControl();
         expect(x.maxSteps).to.eql(10000);
+        expect(x.stiffCheck).to.eql(0);
+        expect(x.atol).to.eql(1e-6);
+        expect(x.rtol).to.eql(1e-6);
     });
 
     it("accepts one new parameter", () => {

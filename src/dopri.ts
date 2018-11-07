@@ -1,4 +1,4 @@
-import {dopriControl, DopriControl} from "./control";
+import {dopriControl, DopriControlParam} from "./control";
 import * as dopri5 from "./dopri5/stepper";
 import * as interpolator from "./interpolator";
 import {Integrator, RhsFn, Stepper} from "./types";
@@ -21,7 +21,7 @@ function integrationError(message: string, t: number) {
 
 export class Dopri implements Integrator {
     private _stepper: Stepper;
-    private _control: DopriControl;
+    private _control: DopriControlParam;
     private _t: number = 0.0;
     private _h: number = 0.0;
 
@@ -34,9 +34,10 @@ export class Dopri implements Integrator {
     private _stiffNNonstiff: number = 0;
     private _lastError: number = 0;
 
-    constructor(rhs: RhsFn, n: number, control = dopriControl({})) {
+    constructor(rhs: RhsFn, n: number,
+                control: Partial<DopriControlParam> = {}) {
         this._stepper = new dopri5.Dopri5(rhs, n);
-        this._control = control;
+        this._control = dopriControl(control);
     }
 
     public initialise(t: number, y: number[]): Dopri {
