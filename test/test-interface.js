@@ -1,5 +1,5 @@
 'use strict';
-var dopri = require("../dist/index.js");
+var dopri = require("../lib/index.js");
 var expect = require('chai').expect;
 
 describe('High level use', () => {

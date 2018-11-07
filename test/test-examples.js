@@ -1,7 +1,7 @@
 'use strict';
 var expect = require('chai').expect;
-var examples = require('../dist/examples.js');
-var utils = require('../dist/utils.js');
+var examples = require('../lib/examples.js');
+var utils = require('../lib/utils.js');
 
 describe('lorenz function', () => {
     it('is correct with known cases', () => {

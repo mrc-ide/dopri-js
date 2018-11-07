@@ -1,6 +1,6 @@
 'use strict';
 var expect = require('chai').expect;
-var utils = require('../dist/utils.js');
+var utils = require('../lib/utils.js');
 
 
 describe('square function', () => {

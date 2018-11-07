@@ -1,7 +1,7 @@
 "use strict";
 var expect = require("chai").expect;
-var utils = require("../dist/utils.js");
-var control = require("../dist/control.js");
+var utils = require("../lib/utils.js");
+var control = require("../lib/control.js");
 
 describe("control parameters", () => {
     it("has sensible defaults", () => {

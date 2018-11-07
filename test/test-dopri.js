@@ -1,10 +1,10 @@
 'use strict';
 var fs = require('fs');
 var expect = require('chai').expect;
-var control = require('../dist/control.js');
-var dopri = require('../dist/dopri.js');
-var examples = require('../dist/examples.js');
-var utils = require("../dist/utils.js");
+var control = require('../lib/control.js');
+var dopri = require('../lib/dopri.js');
+var examples = require('../lib/examples.js');
+var utils = require("../lib/utils.js");
 
 describe('validate initial conditions', () => {
     var solver = new dopri.Dopri(examples.lorenzRhs(), 3);
