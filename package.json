@@ -15,14 +15,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/mrc-ide/dopri-ts.git"
+        "url": "git+https://github.com/mrc-ide/dopri-js.git"
     },
     "author": "Rich FitzJohn <rich.fitzjohn@gmail.com>",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/mrc-ide/dopri-ts/issues"
+        "url": "https://github.com/mrc-ide/dopri-js/issues"
     },
-    "homepage": "https://github.com/mrc-ide/dopri-ts#readme",
+    "homepage": "https://github.com/mrc-ide/dopri-js#readme",
     "devDependencies": {
         "@types/chai": "^4.1.6",
         "@types/mocha": "^5.2.5",
