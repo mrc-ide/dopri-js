@@ -1,5 +1,6 @@
-import {dopriControl, DopriControlParam} from "./control";
+import {Algorithm, dopriControl, DopriControlParam} from "./control";
 import * as dopri5 from "./dopri5/stepper";
+import * as dopri853 from "./dopri853/stepper";
 import {interpolator} from "./interpolator";
 import {HistoryElement, Integrator, RhsFn, Stepper} from "./types";
 import * as utils from "./utils";
@@ -39,8 +40,16 @@ export class Dopri implements Integrator {
 
     constructor(rhs: RhsFn, n: number,
                 control: Partial<DopriControlParam> = {}) {
-        this._stepper = new dopri5.Dopri5(rhs, n);
         this._control = dopriControl(control);
+        switch (this._control.algorithm) {
+            case Algorithm.dopri853:
+                this._stepper = new dopri853.Dopri853(rhs, n);
+                break;
+            case Algorithm.dopri5:
+            default:
+                this._stepper = new dopri5.Dopri5(rhs, n);
+                break;
+        }
     }
 
     public initialise(t: number, y: number[]): Dopri {

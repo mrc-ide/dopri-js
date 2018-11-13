@@ -1,14 +1,21 @@
+export enum Algorithm {
+    dopri5,
+    dopri853,
+}
+
 export interface DopriControlParam {
     maxSteps: number;
     atol: number;
     rtol: number;
     stiffCheck: number;
+    algorithm: Algorithm;
 }
 
 export function dopriControl(control: Partial<DopriControlParam> = {}) {
-    const defaults = {atol: 1e-6, maxSteps: 10000, rtol: 1e-6,
-                      stiffCheck: 0};
+    const defaults = {algorithm: Algorithm.dopri5, atol: 1e-6,
+                      maxSteps: 10000, rtol: 1e-6, stiffCheck: 0};
     const ret = {
+        algorithm: withDefault(control.algorithm, defaults.algorithm),
         atol: withDefault(control.atol, defaults.atol),
         maxSteps: withDefault(control.maxSteps, defaults.maxSteps),
         rtol: withDefault(control.rtol, defaults.rtol),
