@@ -45,10 +45,10 @@ export class Dopri implements Integrator {
         if (y.length !== n) {
             throw Error(`Invalid size 'y' - expected a length ${n} array`);
         }
-        this._stepper.reset(y);
+        this._stepper.reset(t, y);
         this._reset();
-        this._h = this._stepper.initialStepSize(t, this._control.atol,
-                                                this._control.rtol);
+        this._h = initialStepSize(this._stepper, t, y,
+                                  this._control.atol, this._control.rtol);
         this._t = t;
         return this;
     }
@@ -161,4 +161,56 @@ export class Dopri implements Integrator {
         }
         return false;
     }
+}
+
+function initialStepSize(stepper: Stepper, t: number, y: number[],
+                         atol: number, rtol: number) {
+    const stepSizeMax = stepper.stepControl.sizeMax;
+    // NOTE: This is destructive with respect to most of the information
+    // in the object; in particular k2, k3 will be modified.
+    const f0 = new Array<number>(stepper.n);
+    const f1 = new Array<number>(stepper.n);
+    const y1 = new Array<number>(stepper.n);
+
+    // Compute a first guess for explicit Euler as
+    //   h = 0.01 * norm (y0) / norm (f0)
+    // the increment for explicit euler is small compared to the solution
+    stepper.rhs(t, y, f0);
+    stepper.nEval++;
+
+    let normF = 0.0;
+    let normY = 0.0;
+    let i = 0;
+    for (i = 0; i < stepper.n; ++i) {
+        const sk = atol + rtol * Math.abs(y[i]);
+        normF += utils.square(f0[i] / sk);
+        normY += utils.square(y[i]  / sk);
+    }
+    let h = (normF <= 1e-10 || normY <= 1e-10) ?
+        1e-6 : Math.sqrt(normY / normF) * 0.01;
+    h = Math.min(h, stepSizeMax);
+
+    // Perform an explicit Euler step
+    for (i = 0; i < stepper.n; ++i) {
+        y1[i] = y[i] + h * f0[i];
+    }
+    stepper.rhs(t + h, y1, f1);
+    stepper.nEval++;
+
+    // Estimate the second derivative of the solution:
+    let der2 = 0.0;
+    for (i = 0; i < stepper.n; ++i) {
+        const sk = atol + rtol * Math.abs(y[i]);
+        der2 += utils.square((f1[i] - f0[i]) / sk);
+    }
+    der2 = Math.sqrt(der2) / h;
+
+    // Step size is computed such that
+    //   h^order * max(norm(f0), norm(der2)) = 0.01
+    const der12 = Math.max(Math.abs(der2), Math.sqrt(normF));
+    const h1 = (der12 <= 1e-15) ?
+        Math.max(1e-6, Math.abs(h) * 1e-3) :
+        Math.pow(0.01 / der12, 1.0 / stepper.order);
+    h = Math.min(Math.min(100 * Math.abs(h), h1), stepSizeMax);
+    return h;
 }
