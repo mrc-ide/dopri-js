@@ -17,18 +17,17 @@ export interface Stepper {
     readonly order: number;
     readonly yNext: number[];
     readonly stepControl: DopriStepControl;
+    readonly rhs: RhsFn;
     history: number[];
     nEval: number;
 
     step(t: number, h: number): void;
     stepComplete(t: number, h: number): void;
 
-    saveHistory(t: number, h: number): void;
     error(atol: number, rtol: number): number;
     interpolate(t: number, history: number[]): number[];
     isStiff(t: number): boolean;
-    initialStepSize(t: number, atol: number, rtol: number): number;
-    reset(y: number[]): void;
+    reset(t: number, y: number[]): void;
 }
 
 export interface Integrator {
