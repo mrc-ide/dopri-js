@@ -459,57 +459,6 @@ export class Dopri853 implements Stepper {
         return stden > 0 && Math.abs(h) * Math.sqrt(stnum / stden) > 6.1;
     }
 
-    public initialStepSize(t: number, atol: number, rtol: number): number {
-        const stepSizeMax = this.stepControl.sizeMax;
-        // NOTE: This is destructive with respect to most of the information
-        // in the object; in particular k2, k3 will be modified.
-        const f0 = this.k1;
-        const f1 = this.k2;
-        const y1 = this.k3;
-
-        // Compute a first guess for explicit Euler as
-        //   h = 0.01 * norm (y0) / norm (f0)
-        // the increment for explicit euler is small compared to the solution
-        this.rhs(t, this.y, f0);
-        this.nEval++;
-
-        let normF = 0.0;
-        let normY = 0.0;
-        let i = 0;
-        for (i = 0; i < this.n; ++i) {
-            const sk = atol + rtol * Math.abs(this.y[i]);
-            normF += utils.square(f0[i] / sk);
-            normY += utils.square(this.y[i]  / sk);
-        }
-        let h = (normF <= 1e-10 || normF <= 1e-10) ?
-            1e-6 : Math.sqrt(normY / normF) * 0.01;
-        h = Math.min(h, stepSizeMax);
-
-        // Perform an explicit Euler step
-        for (i = 0; i < this.n; ++i) {
-            y1[i] = this.y[i] + h * f0[i];
-        }
-        this.rhs(t + h, y1, f1);
-        this.nEval++;
-
-        // Estimate the second derivative of the solution:
-        let der2 = 0.0;
-        for (i = 0; i < this.n; ++i) {
-            const sk = atol + rtol * Math.abs(this.y[i]);
-            der2 += utils.square((f1[i] - f0[i]) / sk);
-        }
-        der2 = Math.sqrt(der2) / h;
-
-        // Step size is computed such that
-        //   h^order * max(norm(f0), norm(der2)) = 0.01
-        const der12 = Math.max(Math.abs(der2), Math.sqrt(normF));
-        const h1 = (der12 <= 1e-15) ?
-            Math.max(1e-6, Math.abs(h) * 1e-3) :
-            Math.pow(0.01 / der12, 1.0 / this.order);
-        h = Math.min(Math.min(100 * Math.abs(h), h1), stepSizeMax);
-        return h;
-    }
-
     public reset(t: number, y: number[]): void {
         for (let i = 0; i < this.n; ++i) {
             this.y[i] = y[i];
