@@ -245,3 +245,49 @@ describe('interface', () => {
         expect(y3).to.not.deep.eql(y1);
     });
 });
+
+describe('dopri853', () => {
+    it('agrees with dopri5', () => {
+        var r = [-0.5, 0, 0.5];
+        var y0 = [1, 1, 1];
+        var c1 = {algorithm: dopri.Algorithm.dopri5};
+        var c2 = {algorithm: dopri.Algorithm.dopri853};
+
+        var sol1 = new dopri.Dopri(examples.exponentialRhs(r), 3, c1);
+        var sol2 = new dopri.Dopri(examples.exponentialRhs(r), 3, c2);
+        var t = utils.seqLen(0, 25, 101);
+
+        var y1 = sol1.initialise(0, y0).run(25)(t);
+        var y2 = sol2.initialise(0, y0).run(25)(t);
+
+        // the 3rd case here looks quite different, but we can chase
+        // that up with the reference check.  This system covers a lot
+        // of orders of magnitude by the end!
+        for (var i = 0; i < 3; ++i) {
+            expect(utils.approxEqualArray(y1.map(el => el[i]),
+                                          y2.map(el => el[i]),
+                                          5e-5)).to.eql(true);
+        }
+        for (var i = 0; i < 3; ++i) {
+            expect(utils.approxEqualArray(y1.map(el => el[i]),
+                                          y2.map(el => el[i]))).to.eql(i == 1);
+        }
+
+        // Fewer steps with the higher order stepper
+        expect(sol2.statistics().nSteps < sol1.statistics().nSteps).
+            to.eql(true);
+    });
+
+    it('accepts control in high level interface', () => {
+        var rhs = examples.exponentialRhs([0.1]);
+        var c = {algorithm: dopri.Algorithm.dopri853};
+        var t = utils.seqLen(0, 25, 15);
+        var y0 = [1];
+        var solver = new dopri.Dopri(rhs, 1, c);
+
+        var y1 = dopri.integrate(rhs, y0, 0, 25, c)(t);
+        var y2 = solver.initialise(0, y0).run(25)(t);
+        expect(y1).to.deep.eql(y2);
+        expect(y1).to.not.deep.eql(dopri.integrate(rhs, y0, 0, 25)(t));
+    });
+});

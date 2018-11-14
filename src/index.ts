@@ -1,1 +1,1 @@
-export { Dopri, integrate } from "./dopri";
+export { Algorithm, Dopri, integrate } from "./dopri";

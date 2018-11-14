@@ -162,7 +162,7 @@ const D716  = -0.14972683625798562581422125276e+03;
 export class Dopri853 implements Stepper {
     public readonly rhs: RhsFn;
     public readonly n: number;
-    public readonly order: number = 5;
+    public readonly order: number = 8;
     public readonly stepControl = new control.Dopri853StepControl();
 
     // The variables at the beginning of the step

@@ -4,6 +4,7 @@ import * as dopri853 from "./dopri853/stepper";
 import {interpolator} from "./interpolator";
 import {HistoryElement, Integrator, RhsFn, Stepper} from "./types";
 import * as utils from "./utils";
+export {Algorithm};
 
 // needed for ES5 - will be ~= Number.EPSILON in ES6
 const DBL_EPSILON = Math.pow(2, -52); // = 2.220446049250313e-16
