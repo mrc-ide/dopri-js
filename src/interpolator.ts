@@ -1,4 +1,4 @@
-import {Stepper} from "./types";
+import {HistoryElement, Stepper} from "./types";
 
 // We could take either a stepper or the interpolation function here.
 // The advantage of the former is that we can sensibly implement
@@ -14,15 +14,15 @@ import {Stepper} from "./types";
 
 export class Interpolator {
     public readonly stepper: Stepper;
-    public history: number[][];
+    public history: HistoryElement[];
 
     constructor(stepper: Stepper) {
         this.stepper = stepper;
         this.history = [];
     }
 
-    public add(h: number[]) {
-        this.history.push(h.slice(0));
+    public add(h: HistoryElement) {
+        this.history.push(h.clone());
     }
 
     public interpolate(t: number[]) {
@@ -31,28 +31,16 @@ export class Interpolator {
         // integration time.
 
         const h = this.history;
-        // TODO: Time is currently saved into the second to last
-        // element but this would be far better as a small structure
-        // probably. e.g., {t0, h, t1, history}.  It's also possible
-        // that we could do better with some sort of "history
-        // container" object.
-        //
-        // Probably hold off doing most of that until (a) this is
-        // known to work and (b) I work out how the delay lookup will
-        // work as that needs to feed into the derivative function in
-        // odd ways.
-        //
         // TODO: need to protect us from walking off the end of the
         // array (or starting within it).
         //
         // TODO: don't allow anything to happen with a zero-length
         // history.
-        const it = h[0].length - 2;
         let i = 0;
         for (const tj of t) {
             // This bit of calculation is not that nice - we're better
             // off holding both start and end times than doing this.
-            while (h[i][it] + h[i][it + 1] < tj) {
+            while (h[i].t + h[i].h < tj) {
                 i++;
             }
             y.push(this.stepper.interpolate(tj, h[i]));

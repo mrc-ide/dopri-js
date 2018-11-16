@@ -1,4 +1,6 @@
 import * as interpolator from "./interpolator";
+import {HistoryElement} from "./history"
+export {HistoryElement};
 
 export type RhsFn = (t: number, y: number[], dy: number[]) => void;
 
@@ -18,14 +20,14 @@ export interface Stepper {
     readonly yNext: number[];
     readonly stepControl: DopriStepControl;
     readonly rhs: RhsFn;
-    history: number[];
+    history: HistoryElement;
     nEval: number;
 
     step(t: number, h: number): void;
     stepComplete(t: number, h: number): void;
 
     error(atol: number, rtol: number): number;
-    interpolate(t: number, history: number[]): number[];
+    interpolate(t: number, history: HistoryElement): number[];
     isStiff(t: number): boolean;
     reset(t: number, y: number[]): void;
 }
