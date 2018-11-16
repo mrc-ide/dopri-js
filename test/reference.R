@@ -4,6 +4,12 @@
 ## drat::add("mrc-ide")
 ## install.packages("dde")
 
+## The exact answers seem dependent on machine or platform.  dde has
+## no deep internal dependencies but generated different answers
+## (eventually) on two different mac machines with different R and
+## compiler versions.  Things agree for quite a while then start
+## diverging.
+
 ## Generate reference data sets for the lorenz attractor
 lorenz <- function(t, y, .) {
   sigma <- 10.0
@@ -29,5 +35,22 @@ json_matrix <- function(d) {
 
 tt <- seq(0, 25, length.out = 101)
 y0 <- c(10, 1, 1)
-y <- dde::dopri(y0, tt, lorenz, NULL, n_history = 1000L)
-writeLines(json_matrix(y[, -1]), "ref/lorenz_r.json")
+
+y5 <- dde::dopri5(y0, tt, lorenz, NULL, n_history = 1000L)
+writeLines(json_matrix(y5[, -1]), "ref/lorenz_r5.json")
+
+y853 <- dde::dopri853(y0, tt, lorenz, NULL, n_history = 1000L)
+writeLines(json_matrix(y853[, -1]), "ref/lorenz_r853.json")
+
+
+exponential <- function(t, y, p) {
+  y * r
+}
+
+tt <- seq(0, 20, length.out = 51)
+y0 <- 1
+r <- 0.1
+y <- dde::dopri853(y0, tt, exponential, r, n_history = 1000L)
+
+writeLines(json_matrix(y[, -1, drop = FALSE]), "ref/exp_r853.json")
+writeLines(json_matrix(attr(y, "history")), "ref/exp_r853_history.json")

@@ -31,6 +31,8 @@ export function dopriControl(control: Partial<DopriControlParam> = {}) {
     if (ret.rtol <= 0) {
         throw controlError("rtol", "must be strictly positive");
     }
+
+    // TODO: check no known types
     return ret;
 }
 

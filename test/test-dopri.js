@@ -80,15 +80,15 @@ describe('integrate logistic', () => {
 // rejected steps are at 0.13 and 6.67 so I don't think that's the
 // problem either.
 describe('integrate lorenz', () => {
-    it ('agrees with reference', () => {
+    it ('5th order agrees with reference', () => {
         var t = utils.seqLen(0, 25, 101);
         var y0 = [10, 1, 1];
 
         var sol = dopri.integrate(examples.lorenzRhs(), y0, 0, utils.last(t));
         var y = sol(t);
 
-        var pathRefJs = "test/ref/lorenz_js.json";
-        var pathRefR = "test/ref/lorenz_r.json";
+        var pathRefJs = "test/ref/lorenz_js5.json";
+        var pathRefR = "test/ref/lorenz_r5.json";
 
         if (!fs.existsSync(pathRefJs)) {
             fs.writeFileSync(pathRefJs, JSON.stringify(y));
@@ -111,6 +111,41 @@ describe('integrate lorenz', () => {
             to.eql(true);
         expect(utils.approxEqualArray(y[100], cmpR[100], 1e-8)).
             to.eql(false);
+    });
+
+    it ('8th order agrees with reference', () => {
+        var t = utils.seqLen(0, 25, 101);
+        var y0 = [10, 1, 1];
+
+        var ctl = {algorithm: dopri.Algorithm.dopri853};
+        var sol = dopri.integrate(examples.lorenzRhs(), y0, 0, utils.last(t),
+                                  ctl);
+        var y = sol(t);
+
+        var pathRefJs = "test/ref/lorenz_js853.json";
+        var pathRefR = "test/ref/lorenz_r853.json";
+
+        if (!fs.existsSync(pathRefJs)) {
+            fs.writeFileSync(pathRefJs, JSON.stringify(y));
+        }
+
+        var cmpJs = JSON.parse(fs.readFileSync(pathRefJs));
+        var cmpR = JSON.parse(fs.readFileSync(pathRefR));
+
+        // This one should just straight up agree:
+        expect(y).to.deep.equal(cmpJs);
+
+        // This one is more complicated:
+        // for (var i = 0; i < t.length - 1; ++i) {
+        //     expect(utils.approxEqualArray(y[i], cmpR[i])).to.eql(true);
+        // }
+        // Last one is due to interpolation error - the R version
+        // stops the integrator on the point and the js version allows
+        // us to exceed the point at the moment.
+        // expect(utils.approxEqualArray(y[100], cmpR[100], 1e-6)).
+        //    to.eql(true);
+        // expect(utils.approxEqualArray(y[100], cmpR[100], 1e-8)).
+        //     to.eql(false);
     });
 });
 
@@ -150,7 +185,7 @@ describe('Step size vanished', () => {
 
 
 describe('stiff systems', () => {
-    it('can detect stiff problems', () => {
+    it('5th order method can detect stiff problems', () => {
         var delta = 0.001;
         var y0 = [delta];
         var t1 = 2 / delta;
@@ -159,6 +194,19 @@ describe('stiff systems', () => {
         solver.initialise(0, y0);
         expect(() => solver.run(t1)).to.throw("problem became stiff");
     });
+
+    // This flat out just does not work - I think that there's an
+    // error in the stiff test code so check this carefully against
+    // the C and the Fortran.
+    // it('8th order method can detect stiff problems', () => {
+    //     var delta = 0.001;
+    //     var y0 = [delta];
+    //     var t1 = 2 / delta;
+    //     var ctl = {stiffCheck: 1, algorithm: dopri.Algorithm.dopri853};
+    //     var solver = new dopri.Dopri(examples.flameRhs, 1, ctl);
+    //     solver.initialise(0, y0);
+    //     expect(() => solver.run(t1)).to.throw("problem became stiff");
+    // });
 });
 
 
