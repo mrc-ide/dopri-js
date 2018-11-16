@@ -7,7 +7,7 @@ export class HistoryElement {
         this.t = 0;
         this.h = 0;
         this.data = new Array<number>(len);
-    };
+    }
 
     public clone(): HistoryElement {
         const h = new HistoryElement(this.data.length);
