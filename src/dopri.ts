@@ -9,8 +9,9 @@ const DBL_EPSILON = Math.pow(2, -52); // = 2.220446049250313e-16
 const STEP_FACTOR_MIN = 1e-4;
 
 export function integrate(rhs: RhsFn, y: number[],
-                          t0: number, t1: number) {
-    const solver = new Dopri(rhs, y.length);
+                          t0: number, t1: number,
+                          control: Partial<DopriControlParam> = {}) {
+    const solver = new Dopri(rhs, y.length, control);
     solver.initialise(t0, y);
     return solver.run(t1);
 }

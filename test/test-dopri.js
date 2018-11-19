@@ -242,3 +242,19 @@ describe('no absolute error', () => {
         expect(utils.approxEqualArray(y, [1], 1e-6)).to.eql(true);
     });
 });
+
+
+describe('interface', () => {
+    it('accepts control in high-level interface', () => {
+        var ctl = {atol: 1e-4, rtol: 1e-4};
+        var t = utils.seqLen(0, 25, 101);
+        var y0 = [10, 1, 1];
+        var rhs = examples.lorenzRhs();
+        var solver = new dopri.Dopri(rhs, 3, ctl);
+        var y1 = solver.initialise(0, y0).run(25)(t);
+        var y2 = dopri.integrate(rhs, y0, 0, 25, ctl)(t);
+        var y3 = dopri.integrate(rhs, y0, 0, 25)(t);
+        expect(y2).to.deep.eql(y1);
+        expect(y3).to.not.deep.eql(y1);
+    });
+});
