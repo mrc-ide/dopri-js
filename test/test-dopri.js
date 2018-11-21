@@ -258,3 +258,25 @@ describe('interface', () => {
         expect(y3).to.not.deep.eql(y1);
     });
 });
+
+describe('output', () => {
+    it('is computed correctly', () => {
+        var out = (t, y) => [y.reduce((a, b) => a + b, 0)];
+        var r = [-0.5, 0, 0.5];
+        var y0 = [1, 1, 1];
+        var rhs = examples.exponentialRhs(r);
+
+        var solver = new dopri.Dopri(rhs, r.length, {}, out);
+        solver.initialise(0, y0);
+        var sol = solver.run(25);
+
+        var t = utils.seqLen(0, 10, 11);
+
+        var y = sol(t);
+        y.forEach((el) => expect(el[0] + el[1] + el[2]).to.eql(el[3]));
+
+        var sol2 = dopri.integrate(rhs, y0, 0, 10, {}, out);
+        var y2 = sol2(t);
+        expect(y2).to.deep.eql(y);
+    });
+});

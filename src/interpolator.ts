@@ -1,10 +1,12 @@
-import {History, Stepper} from "./types";
+import {History, OutputFn, Stepper} from "./types";
 
-export function interpolator(history: History, stepper: Stepper) {
-    return (t: number[]) => interpolate(t, history, stepper);
+export function interpolator(history: History, stepper: Stepper,
+                             output: OutputFn) {
+    return (t: number[]) => interpolate(t, history, stepper, output);
 }
 
-function interpolate(t: number[], history: History, stepper: Stepper) {
+function interpolate(t: number[], history: History, stepper: Stepper,
+                     output: OutputFn) {
     const y: number[][] = [];
     // TODO: validate that 't' is increasing and fits within
     // integration time.
@@ -22,7 +24,11 @@ function interpolate(t: number[], history: History, stepper: Stepper) {
         while (h[i].t + h[i].h < tj) {
             i++;
         }
-        y.push(stepper.interpolate(tj, h[i]));
+        let yj = stepper.interpolate(tj, h[i]);
+        if (output !== null) {
+            yj = yj.concat(output(tj, yj));
+        }
+        y.push(yj);
     }
     return y;
 }

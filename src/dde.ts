@@ -1,16 +1,19 @@
 import {DopriControlParam} from "./control";
 import {Dopri} from "./dopri";
-import {HistoryElement, RhsFnDelayed} from "./types";
+import {HistoryElement, OutputFnDelayed, RhsFnDelayed} from "./types";
 import {search} from "./utils";
 
 export class DDE extends Dopri {
     private _y0: number[];
     constructor(rhs: RhsFnDelayed, n: number,
-                control: Partial<DopriControlParam> = {}) {
+                control: Partial<DopriControlParam> = {},
+                output: OutputFnDelayed = null) {
         const solution = (t: number) => this._interpolate(t);
         const rhsUse = (t: number, y: number[], dy: number[]) =>
             rhs(t, y, dy, solution);
-        super(rhsUse, n, control);
+        const outputUse = output === null ? null :
+            (t: number, y: number[]) => output(t, y, solution);
+        super(rhsUse, n, control, outputUse);
         this._y0 = [];
     }
 

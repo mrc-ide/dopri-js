@@ -3,6 +3,7 @@ import * as interpolator from "./interpolator";
 export {History, HistoryElement};
 
 export type RhsFn = (t: number, y: number[], dy: number[]) => void;
+export type OutputFn = null | ((t: number, y: number[]) => number[]);
 
 export interface DopriStepControl {
     beta: number;
@@ -41,3 +42,6 @@ export interface Integrator {
 export type InterpolatedSolution = (t: number) => number[];
 export type RhsFnDelayed = (t: number, y: number[], dy: number[],
                             solution: InterpolatedSolution) => void;
+export type OutputFnDelayed =
+    null |
+    ((t: number, y: number[], solution: InterpolatedSolution) => number[]);

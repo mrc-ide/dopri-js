@@ -1,7 +1,7 @@
 import {dopriControl, DopriControlParam} from "./control";
 import * as dopri5 from "./dopri5/stepper";
 import {interpolator} from "./interpolator";
-import {History, Integrator, RhsFn, Stepper} from "./types";
+import {History, Integrator, OutputFn, RhsFn, Stepper} from "./types";
 import * as utils from "./utils";
 
 // needed for ES5 - will be ~= Number.EPSILON in ES6
@@ -10,8 +10,9 @@ const STEP_FACTOR_MIN = 1e-4;
 
 export function integrate(rhs: RhsFn, y: number[],
                           t0: number, t1: number,
-                          control: Partial<DopriControlParam> = {}) {
-    const solver = new Dopri(rhs, y.length, control);
+                          control: Partial<DopriControlParam> = {},
+                          output: OutputFn = null) {
+    const solver = new Dopri(rhs, y.length, control, output);
     solver.initialise(t0, y);
     return solver.run(t1);
 }
@@ -25,6 +26,7 @@ export class Dopri implements Integrator {
     protected _history: History = [];
 
     private _control: DopriControlParam;
+    private _output: OutputFn;
     private _t: number = 0.0;
     private _h: number = 0.0;
 
@@ -38,9 +40,11 @@ export class Dopri implements Integrator {
     private _lastError: number = 0;
 
     constructor(rhs: RhsFn, n: number,
-                control: Partial<DopriControlParam> = {}) {
+                control: Partial<DopriControlParam> = {},
+                output: OutputFn = null) {
         this._stepper = new dopri5.Dopri5(rhs, n);
         this._control = dopriControl(control);
+        this._output = output;
     }
 
     public initialise(t: number, y: number[]): Dopri {
@@ -62,7 +66,8 @@ export class Dopri implements Integrator {
             this._step();
             this._history.push(this._stepper.history.clone());
         }
-        return interpolator(this._history.slice(0), this._stepper);
+        return interpolator(this._history.slice(0), this._stepper,
+                            this._output);
     }
 
     public statistics() {
