@@ -17,3 +17,5 @@ export class HistoryElement {
         return h;
     }
 }
+
+export type History = HistoryElement[];

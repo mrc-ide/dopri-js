@@ -1,6 +1,6 @@
-import {HistoryElement} from "./history";
+import {History, HistoryElement} from "./history";
 import * as interpolator from "./interpolator";
-export {HistoryElement};
+export {History, HistoryElement};
 
 export type RhsFn = (t: number, y: number[], dy: number[]) => void;
 

@@ -1,7 +1,7 @@
 import {dopriControl, DopriControlParam} from "./control";
 import * as dopri5 from "./dopri5/stepper";
 import {interpolator} from "./interpolator";
-import {HistoryElement, Integrator, RhsFn, Stepper} from "./types";
+import {History, Integrator, RhsFn, Stepper} from "./types";
 import * as utils from "./utils";
 
 // needed for ES5 - will be ~= Number.EPSILON in ES6
@@ -21,7 +21,9 @@ function integrationError(message: string, t: number) {
 }
 
 export class Dopri implements Integrator {
-    private _stepper: Stepper;
+    protected _stepper: Stepper;
+    protected _history: History = [];
+
     private _control: DopriControlParam;
     private _t: number = 0.0;
     private _h: number = 0.0;
@@ -34,8 +36,6 @@ export class Dopri implements Integrator {
     private _stiffNStiff: number = 0;
     private _stiffNNonstiff: number = 0;
     private _lastError: number = 0;
-
-    private _history: HistoryElement[] = [];
 
     constructor(rhs: RhsFn, n: number,
                 control: Partial<DopriControlParam> = {}) {

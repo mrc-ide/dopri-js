@@ -1,10 +1,10 @@
-import {HistoryElement, Stepper} from "./types";
+import {History, Stepper} from "./types";
 
-export function interpolator(history: HistoryElement[], stepper: Stepper) {
+export function interpolator(history: History, stepper: Stepper) {
     return (t: number[]) => interpolate(t, history, stepper);
 }
 
-function interpolate(t: number[], history: HistoryElement[], stepper: Stepper) {
+function interpolate(t: number[], history: History, stepper: Stepper) {
     const y: number[][] = [];
     // TODO: validate that 't' is increasing and fits within
     // integration time.
