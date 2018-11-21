@@ -37,3 +37,7 @@ export interface Integrator {
     run(tEnd: number): (t: number[]) => number[][];
     statistics(): object;
 }
+
+export type InterpolatedSolution = (t: number) => number[];
+export type RhsFnDelayed = (t: number, y: number[], dy: number[],
+                            solution: InterpolatedSolution) => void;
