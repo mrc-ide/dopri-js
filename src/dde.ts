@@ -14,7 +14,7 @@ export class DDE extends Dopri {
         const outputUse = output === null ? null :
             (t: number, y: number[]) => output(t, y, solution);
         super(rhsUse, n, control, outputUse);
-        this._y0 = [];
+        this._y0 = new Array<number>(n);
     }
 
     public initialise(t: number, y: number[]): DDE {
