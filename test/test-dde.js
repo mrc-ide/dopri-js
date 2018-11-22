@@ -36,4 +36,25 @@ describe('Interface', () => {
         var yODE = solODE.initialise(0, y0).run(10)(t);
         expect(yDDE).to.deep.eql(yODE);
     });
+
+    it('Agrees with ODE for ODE systems with simple interface', () => {
+        var y0 = [1], r = 0.5, K = 100;
+        var rhs = examples.logisticRhs(r, K);
+        var t = utils.seqLen(0, 10, 11);
+        var yODE = dopri.integrate(rhs, y0, 0, 10)(t);
+        var yDDE = dde.integrate(rhs, y0, 0, 10)(t);
+        expect(yDDE).to.deep.eql(yODE);
+    });
+
+
+    it('Agrees with ODE for ODE systems with simple interface', () => {
+        var y0 = [1], r = 0.5, K = 100;
+        var rhs = examples.logisticRhs(r, K);
+        var out = (t, y) => [y[0] / 2];
+        var t = utils.seqLen(0, 10, 11);
+        var ctl = {atol: 1e-3, rtol: 1e-3};
+        var yODE = dopri.integrate(rhs, y0, 0, 10, ctl, out)(t);
+        var yDDE = dde.integrate(rhs, y0, 0, 10, ctl, out)(t);
+        expect(yDDE).to.deep.eql(yODE);
+    });
 });
