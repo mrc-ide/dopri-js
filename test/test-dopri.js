@@ -230,3 +230,15 @@ describe('details', () => {
         expect(s.nStepsRejected).to.eql(0);
     });
 });
+
+
+describe('no absolute error', () => {
+    it ('can start integration with no absolute error', () => {
+        var rhs = function(t, y, dydt) {
+            dydt[0] = 1;
+        };
+        var sol = dopri.integrate(rhs, [0], 0, 1);
+        var y = sol([1])[0];
+        expect(utils.approxEqualArray(y, [1], 1e-6)).to.eql(true);
+    });
+});
