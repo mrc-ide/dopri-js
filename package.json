@@ -1,6 +1,6 @@
 {
     "name": "dopri",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Dormand–Prince methods",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",

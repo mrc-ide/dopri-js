@@ -230,7 +230,7 @@ export class Dopri5 implements Stepper {
             normF += utils.square(f0[i] / sk);
             normY += utils.square(this.y[i]  / sk);
         }
-        let h = (normF <= 1e-10 || normF <= 1e-10) ?
+        let h = (normF <= 1e-10 || normY <= 1e-10) ?
             1e-6 : Math.sqrt(normY / normF) * 0.01;
         h = Math.min(h, stepSizeMax);
 
