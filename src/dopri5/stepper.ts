@@ -1,7 +1,7 @@
 import * as utils from "../utils";
 import * as control from "./control";
 
-import {RhsFn, Stepper} from "../types";
+import {HistoryElement, RhsFn, Stepper} from "../types";
 
 // Heaps of constants!
 const C2 = 0.2;
@@ -42,9 +42,6 @@ const D5 = 701980252875.0 / 199316789632.0;
 const D6 = -1453857185.0 / 822651844.0;
 const D7 = 69997945.0 / 29380423.0;
 
-// most of this can be made really quit private - everything not used
-// in the interface really.
-
 export class Dopri5 implements Stepper {
     public readonly rhs: RhsFn;
     public readonly n: number;
@@ -66,7 +63,7 @@ export class Dopri5 implements Stepper {
     public k5: number[];
     public k6: number[];
 
-    public history: number[];
+    public history: HistoryElement;
 
     public nEval: number = 0;
 
@@ -83,7 +80,7 @@ export class Dopri5 implements Stepper {
         this.k4 = new Array<number>(n);
         this.k5 = new Array<number>(n);
         this.k6 = new Array<number>(n);
-        this.history = new Array<number>(this.order * n + 2);
+        this.history = new HistoryElement(this.order * n);
     }
 
     // This is the ugliest function - quite a lot goes on in here to
@@ -99,7 +96,7 @@ export class Dopri5 implements Stepper {
         const k4 = this.k4;
         const k5 = this.k5;
         const k6 = this.k6;
-        const history = this.history;
+        const hData = this.history.data;
 
         let i = 0;
         for (i = 0; i < n; ++i) { // 22
@@ -134,8 +131,8 @@ export class Dopri5 implements Stepper {
 
         let j = 4 * n;
         for (i = 0; i < n; ++i) {
-            history[j++] = h * (D1 * k1[i] + D3 * k3[i] + D4 * k4[i] +
-                                D5 * k5[i] + D6 * k6[i] + D7 * k2[i]);
+            hData[j++] = h * (D1 * k1[i] + D3 * k3[i] + D4 * k4[i] +
+                              D5 * k5[i] + D6 * k6[i] + D7 * k2[i]);
         }
 
         for (i = 0; i < n; ++i) {
@@ -147,23 +144,8 @@ export class Dopri5 implements Stepper {
 
     public stepComplete(t: number, h: number): void {
         this.saveHistory(t, h);
-        utils.copyArray(this.k1, this.k2);   // k1 <== k2
-        utils.copyArray(this.y, this.yNext); // y  <== yNext
-    }
-
-    public saveHistory(t: number, h: number): void {
-        const history = this.history;
-        const n = this.n;
-        for (let i = 0; i < n; ++i) {
-            const ydiff = this.yNext[i] - this.y[i];
-            const bspl = h * this.k1[i] - ydiff;
-            history[        i] = this.y[i];
-            history[    n + i] = ydiff;
-            history[2 * n + i] = bspl;
-            history[3 * n + i] = -h * this.k2[i] + ydiff - bspl;
-        }
-        history[this.order * n    ] = t;
-        history[this.order * n + 1] = h;
+        utils.copyArray(this.k1, this.k2);    // k1 <== k2
+        utils.copyArray(this.y,  this.yNext); // y  <== yNext
     }
 
     public error(atol: number, rtol: number): number {
@@ -177,23 +159,20 @@ export class Dopri5 implements Stepper {
         return Math.sqrt(err / this.n);
     }
 
-    // It might be worth doing an optional argument history and then
-    // pulling in this.history if it's not present
-    public interpolate(t: number, history: number[]): number[] {
-        const n = this.n;
-        const tStep = history[this.order * n    ];
-        const hStep = history[this.order * n + 1];
-        const theta = (t - tStep) / hStep;
+    public interpolate(t: number, history: HistoryElement): number[] {
+        const hData = history.data;
+        const theta = (t - history.t) / history.h;
         const theta1 = 1 - theta;
 
+        const n = this.n;
         const ret = new Array<number>(n);
         for (let i = 0; i < n; ++i) {
             ret[i] =
-                history[i] + theta *
-                (history[n + i] + theta1 *
-                 (history[2 * n + i] + theta *
-                  (history[3 * n + i] + theta1 *
-                   history[4 * n + i])));
+                hData[i] + theta *
+                (hData[n + i] + theta1 *
+                 (hData[2 * n + i] + theta *
+                  (hData[3 * n + i] + theta1 *
+                   hData[4 * n + i])));
         }
         return ret;
     }
@@ -208,61 +187,26 @@ export class Dopri5 implements Stepper {
         return stden > 0 && Math.abs(h) * Math.sqrt(stnum / stden) > 3.25;
     }
 
-    public initialStepSize(t: number, atol: number, rtol: number): number {
-        const stepSizeMax = this.stepControl.sizeMax;
-        // NOTE: This is destructive with respect to most of the information
-        // in the dataect; in particular k2, k3 will be modified.
-        const f0 = this.k1;
-        const f1 = this.k2;
-        const y1 = this.k3;
-
-        // Compute a first guess for explicit Euler as
-        //   h = 0.01 * norm (y0) / norm (f0)
-        // the increment for explicit euler is small compared to the solution
-        this.rhs(t, this.y, f0);
-        this.nEval++;
-
-        let normF = 0.0;
-        let normY = 0.0;
-        let i = 0;
-        for (i = 0; i < this.n; ++i) {
-            const sk = atol + rtol * Math.abs(this.y[i]);
-            normF += utils.square(f0[i] / sk);
-            normY += utils.square(this.y[i]  / sk);
-        }
-        let h = (normF <= 1e-10 || normY <= 1e-10) ?
-            1e-6 : Math.sqrt(normY / normF) * 0.01;
-        h = Math.min(h, stepSizeMax);
-
-        // Perform an explicit Euler step
-        for (i = 0; i < this.n; ++i) {
-            y1[i] = this.y[i] + h * f0[i];
-        }
-        this.rhs(t + h, y1, f1);
-        this.nEval++;
-
-        // Estimate the second derivative of the solution:
-        let der2 = 0.0;
-        for (i = 0; i < this.n; ++i) {
-            const sk = atol + rtol * Math.abs(this.y[i]);
-            der2 += utils.square((f1[i] - f0[i]) / sk);
-        }
-        der2 = Math.sqrt(der2) / h;
-
-        // Step size is computed such that
-        //   h^order * max(norm(f0), norm(der2)) = 0.01
-        const der12 = Math.max(Math.abs(der2), Math.sqrt(normF));
-        const h1 = (der12 <= 1e-15) ?
-            Math.max(1e-6, Math.abs(h) * 1e-3) :
-            Math.pow(0.01 / der12, 1.0 / this.order);
-        h = Math.min(Math.min(100 * Math.abs(h), h1), stepSizeMax);
-        return h;
-    }
-
-    public reset(y: number[]): void {
+    public reset(t: number, y: number[]): void {
         for (let i = 0; i < this.n; ++i) {
             this.y[i] = y[i];
         }
-        this.nEval = 0;
+        this.rhs(t, y, this.k1);
+        this.nEval = 1;
+    }
+
+    private saveHistory(t: number, h: number): void {
+        const history = this.history;
+        const n = this.n;
+        for (let i = 0; i < n; ++i) {
+            const ydiff = this.yNext[i] - this.y[i];
+            const bspl = h * this.k1[i] - ydiff;
+            history.data[        i] = this.y[i];
+            history.data[    n + i] = ydiff;
+            history.data[2 * n + i] = bspl;
+            history.data[3 * n + i] = -h * this.k2[i] + ydiff - bspl;
+        }
+        history.t = t;
+        history.h = h;
     }
 }

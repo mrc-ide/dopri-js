@@ -70,3 +70,33 @@ describe('approximately equal arrays', () => {
         expect(utils.approxEqualArray(x, y, 1e-7)).to.eql(true);
     });
 });
+
+
+describe("binary search", () => {
+    it("works with simple data", () => {
+        var x = utils.seqLen(0, 5, 6);
+
+        var makeCompare = function(target) {
+            return (el) => el > target;
+        };
+
+        expect(utils.search(x, makeCompare(1.5))).to.eql(1);
+        expect(utils.search(x, makeCompare(1 + 1e-10))).to.eql(1);
+        expect(utils.search(x, makeCompare(1))).to.eql(1);
+
+        for (var i = 0; i < x.length; ++i) {
+            expect(utils.search(x, makeCompare(i + 0.5))).to.eql(i);
+        }
+
+        expect(utils.search(x, makeCompare(-0.5))).to.eql(-1);
+        expect(utils.search(x, makeCompare(x.length + 1))).to.eql(x.length - 1);
+    });
+
+    it("works with complex data", () => {
+        var x = utils.seqLen(0, 5, 6).map((el) => ({t: el, h: {}}));
+        var makeCompare = function(target) {
+            return (el) => el.t > target;
+        };
+        expect(utils.search(x, makeCompare(1.5))).to.eql(1);
+    });
+});

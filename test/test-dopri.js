@@ -198,7 +198,7 @@ describe('statistics', () => {
     it('is all zeroed except nEval after initialisation', () => {
         solver.initialise(0, [10, 1, 1]);
         var stats = solver.statistics();
-        expect(stats.nEval).to.eql(2);
+        expect(stats.nEval).to.eql(3);
         expect(stats.nSteps).to.eql(0);
         expect(stats.nStepsAccepted).to.eql(0);
         expect(stats.nStepsRejected).to.eql(0);
@@ -209,7 +209,7 @@ describe('statistics', () => {
     it('is all over the show after running', () => {
         solver.run(10);
         var stats = solver.statistics();
-        expect(stats.nEval).to.eql(2090);
+        expect(stats.nEval).to.eql(2091);
         expect(stats.nSteps).to.eql(348);
         expect(stats.nStepsAccepted).to.eql(340);
         expect(stats.nStepsRejected).to.eql(8);
@@ -240,5 +240,43 @@ describe('no absolute error', () => {
         var sol = dopri.integrate(rhs, [0], 0, 1);
         var y = sol([1])[0];
         expect(utils.approxEqualArray(y, [1], 1e-6)).to.eql(true);
+    });
+});
+
+
+describe('interface', () => {
+    it('accepts control in high-level interface', () => {
+        var ctl = {atol: 1e-4, rtol: 1e-4};
+        var t = utils.seqLen(0, 25, 101);
+        var y0 = [10, 1, 1];
+        var rhs = examples.lorenzRhs();
+        var solver = new dopri.Dopri(rhs, 3, ctl);
+        var y1 = solver.initialise(0, y0).run(25)(t);
+        var y2 = dopri.integrate(rhs, y0, 0, 25, ctl)(t);
+        var y3 = dopri.integrate(rhs, y0, 0, 25)(t);
+        expect(y2).to.deep.eql(y1);
+        expect(y3).to.not.deep.eql(y1);
+    });
+});
+
+describe('output', () => {
+    it('is computed correctly', () => {
+        var out = (t, y) => [y.reduce((a, b) => a + b, 0)];
+        var r = [-0.5, 0, 0.5];
+        var y0 = [1, 1, 1];
+        var rhs = examples.exponentialRhs(r);
+
+        var solver = new dopri.Dopri(rhs, r.length, {}, out);
+        solver.initialise(0, y0);
+        var sol = solver.run(25);
+
+        var t = utils.seqLen(0, 10, 11);
+
+        var y = sol(t);
+        y.forEach((el) => expect(el[0] + el[1] + el[2]).to.eql(el[3]));
+
+        var sol2 = dopri.integrate(rhs, y0, 0, 10, {}, out);
+        var y2 = sol2(t);
+        expect(y2).to.deep.eql(y);
     });
 });

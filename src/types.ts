@@ -1,6 +1,9 @@
+import {History, HistoryElement} from "./history";
 import * as interpolator from "./interpolator";
+export {History, HistoryElement};
 
 export type RhsFn = (t: number, y: number[], dy: number[]) => void;
+export type OutputFn = null | ((t: number, y: number[]) => number[]);
 
 export interface DopriStepControl {
     beta: number;
@@ -17,18 +20,17 @@ export interface Stepper {
     readonly order: number;
     readonly yNext: number[];
     readonly stepControl: DopriStepControl;
-    history: number[];
+    readonly rhs: RhsFn;
+    history: HistoryElement;
     nEval: number;
 
     step(t: number, h: number): void;
     stepComplete(t: number, h: number): void;
 
-    saveHistory(t: number, h: number): void;
     error(atol: number, rtol: number): number;
-    interpolate(t: number, history: number[]): number[];
+    interpolate(t: number, history: HistoryElement): number[];
     isStiff(t: number): boolean;
-    initialStepSize(t: number, atol: number, rtol: number): number;
-    reset(y: number[]): void;
+    reset(t: number, y: number[]): void;
 }
 
 export interface Integrator {
@@ -36,3 +38,10 @@ export interface Integrator {
     run(tEnd: number): (t: number[]) => number[][];
     statistics(): object;
 }
+
+export type InterpolatedSolution = (t: number) => number[];
+export type RhsFnDelayed = (t: number, y: number[], dy: number[],
+                            solution: InterpolatedSolution) => void;
+export type OutputFnDelayed =
+    null |
+    ((t: number, y: number[], solution: InterpolatedSolution) => number[]);
