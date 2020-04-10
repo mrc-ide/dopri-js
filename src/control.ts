@@ -14,7 +14,7 @@ export function dopriControl(control: Partial<DopriControlParam> = {}) {
         maxSteps: withDefault(control.maxSteps, defaults.maxSteps),
         rtol: withDefault(control.rtol, defaults.rtol),
         stiffCheck: withDefault(control.stiffCheck, defaults.stiffCheck),
-        tcrit: withDefault(control.tcrit, defaults.tcrit)
+        tcrit: withDefault(control.tcrit, defaults.tcrit),
     };
 
     if (ret.maxSteps < 1) {
