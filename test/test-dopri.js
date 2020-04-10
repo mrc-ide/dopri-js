@@ -280,3 +280,21 @@ describe('output', () => {
         expect(y2).to.deep.eql(y);
     });
 });
+
+describe('tcrit', () => {
+    it('can stop in time', () => {
+        var ctl = {tcrit: 1}
+        var rhs = function(t, y, dydt) {
+            dydt[0] = 1;
+        };
+        var solver = new dopri.Dopri(rhs, 1, ctl);
+        solver.initialise(0, [1]);
+        solver.run(1);
+        expect(solver._t).to.eql(1);
+
+        solver = new dopri.Dopri(rhs, 1);
+        solver.initialise(0, [1]);
+        solver.run(1);
+        expect(solver._t).to.greaterThan(1);
+    })
+});

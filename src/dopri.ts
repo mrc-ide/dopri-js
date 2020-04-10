@@ -109,6 +109,9 @@ export class Dopri implements Integrator {
             if (h <= Math.abs(t) * DBL_EPSILON) {
                 throw integrationError("step size vanished", t);
             }
+            if (t + h > this._control.tcrit) {
+                h = this._control.tcrit - t;
+            }
 
             // Carry out the step
             this._stepper.step(t, h);
