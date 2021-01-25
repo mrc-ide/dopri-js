@@ -102,7 +102,7 @@ describe('integrate lorenz', () => {
 
         // This one is more complicated:
         for (var i = 0; i < t.length - 1; ++i) {
-            expect(utils.approxEqualArray(y[i], cmpR[i])).to.eql(true);
+            expect(utils.approxEqualArray(y[i], cmpR[i], 1e-6)).to.eql(true);
         }
         // Last one is due to interpolation error - the R version
         // stops the integrator on the point and the js version allows
