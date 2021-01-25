@@ -132,6 +132,21 @@ describe('Step size too small', () => {
         solver.initialise(0, [0.1]);
         expect(() => solver.run(100)).to.throw("step too small");
     });
+
+    // This is easier to verify with Lorenz than flame
+    it('Can continue if told that is ok', () => {
+        var ctl = {stepSizeMin: 0.01, stepSizeMinAllow: true};
+        var solver = new dopri.Dopri(examples.lorenzRhs(), 3, ctl);
+        solver.initialise(0, [10, 1, 1]);
+        solver.run(1);
+
+        var min_diff = Infinity;
+        var history = solver._history;
+        for (var i = 1; i < history.length; ++i) {
+            min_diff = Math.min(min_diff, history[i].t - history[i - 1].t);
+        }
+        expect(min_diff).to.eql(0.01);
+    });
 });
 
 
