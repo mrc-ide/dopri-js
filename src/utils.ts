@@ -72,10 +72,6 @@ export function seqLen(a: number, b: number, len: number): number[] {
     return ret;
 }
 
-export function last<T>(x: T[]): T {
-    return x[x.length - 1];
-}
-
 // See richfitz/ring:inst/include/ring/ring.c - this is closely based
 // off of this; that code was written for the same purpose.
 //
