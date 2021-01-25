@@ -98,19 +98,26 @@ export class Dopri implements Integrator {
         let reject = false;
         const facOld = Math.max(this._lastError, 1e-4);
         const stepControl = this._stepper.stepControl;
+        const control = this._control;
 
         while (!success) {
-            if (this._nSteps > this._control.maxSteps) {
+            let forceThisStep = false;
+            if (this._nSteps > control.maxSteps) {
                 throw integrationError("too many steps", t);
             }
-            if (h < this._stepper.stepControl.sizeMin) {
-                throw integrationError("step too small", t);
+            if (h < control.stepSizeMin) {
+                if (control.stepSizeMinAllow) {
+                    h = control.stepSizeMin;
+                    forceThisStep = true;
+                } else {
+                    throw integrationError("step too small", t);
+                }
             }
             if (h <= Math.abs(t) * DBL_EPSILON) {
                 throw integrationError("step size vanished", t);
             }
-            if (t + h > this._control.tcrit) {
-                h = this._control.tcrit - t;
+            if (t + h > control.tcrit) {
+                h = control.tcrit - t;
             }
 
             // Carry out the step
@@ -118,8 +125,7 @@ export class Dopri implements Integrator {
             this._nSteps++;
 
             // Error estimation
-            const err = this._stepper.error(this._control.atol,
-                                            this._control.rtol);
+            const err = this._stepper.error(control.atol, control.rtol);
 
             const fac11 = Math.pow(err, stepControl.constant);
             const facc1 = 1.0 / stepControl.factorMin;
@@ -141,7 +147,11 @@ export class Dopri implements Integrator {
                 const hNew = h / fac;
 
                 this._t += h;
-                this._h = reject ? Math.min(hNew, h) : hNew;
+                if (reject) {
+                    this._h = Math.min(hNew, h);
+                } else {
+                    this._h = Math.min(hNew, control.stepSizeMax);
+                }
                 this._lastError = err;
             } else {
                 reject = true;

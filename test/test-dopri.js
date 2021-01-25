@@ -126,10 +126,10 @@ describe('Exceed max steps', () => {
 
 
 describe('Step size too small', () => {
-    it('Throws when max steps exceeded', () => {
-        var solver = new dopri.Dopri(examples.flameRhs, 1);
+    it('Throws when step size becomes too small', () => {
+        var ctl = {stepSizeMin: 0.1};
+        var solver = new dopri.Dopri(examples.flameRhs, 1, ctl);
         solver.initialise(0, [0.1]);
-        solver._stepper.stepControl.sizeMin = 0.1;
         expect(() => solver.run(100)).to.throw("step too small");
     });
 });
