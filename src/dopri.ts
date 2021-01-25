@@ -55,7 +55,8 @@ export class Dopri implements Integrator {
         this._stepper.reset(t, y);
         this._reset();
         this._h = initialStepSize(this._stepper, t, y,
-                                  this._control.atol, this._control.rtol);
+                                  this._control.atol, this._control.rtol,
+                                  this._control.stepSizeMax);
         this._t = t;
         this._history = [];
         return this;
@@ -185,8 +186,7 @@ export class Dopri implements Integrator {
 }
 
 function initialStepSize(stepper: Stepper, t: number, y: number[],
-                         atol: number, rtol: number) {
-    const stepSizeMax = stepper.stepControl.sizeMax;
+                         atol: number, rtol: number, stepSizeMax: number) {
     // NOTE: This is destructive with respect to most of the information
     // in the object; in particular k2, k3 will be modified.
     const f0 = new Array<number>(stepper.n);

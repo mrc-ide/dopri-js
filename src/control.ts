@@ -12,7 +12,7 @@ export interface DopriControlParam {
 export function dopriControl(control: Partial<DopriControlParam> = {}) {
     const defaults = {atol: 1e-6, maxSteps: 10000, rtol: 1e-6,
                       stiffCheck: 0, tcrit: Infinity,
-                      stepSizeMin: 0, stepSizeMax: Infinity,
+                      stepSizeMin: 1e-8, stepSizeMax: Infinity,
                       stepSizeMinAllow: false};
     const ret = {
         atol: withDefault(control.atol, defaults.atol),

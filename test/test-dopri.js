@@ -136,9 +136,9 @@ describe('Step size too small', () => {
 
 
 describe('Step size vanished', () => {
-    it('Throws when max steps exceeded', () => {
+    it('Throws when step size vanishes', () => {
         var solver = new dopri.Dopri(examples.exponentialRhs([0.5]), 1);
-        var h = solver._stepper.stepControl.sizeMin;
+        var h = solver._control.stepSizeMin;
 
         solver.initialise(h / 2**(-52), [0.1]);
         solver._h = h;
