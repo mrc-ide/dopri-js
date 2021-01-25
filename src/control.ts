@@ -10,20 +10,25 @@ export interface DopriControlParam {
 }
 
 export function dopriControl(control: Partial<DopriControlParam> = {}) {
-    const defaults = {atol: 1e-6, maxSteps: 10000, rtol: 1e-6,
-                      stiffCheck: 0, tcrit: Infinity,
-                      stepSizeMin: 1e-8, stepSizeMax: Infinity,
-                      stepSizeMinAllow: false};
+    const defaults = {atol: 1e-6,
+                      maxSteps: 10000,
+                      rtol: 1e-6,
+                      stepSizeMax: Infinity,
+                      stepSizeMin: 1e-8,
+                      stepSizeMinAllow: false,
+                      stiffCheck: 0,
+                      tcrit: Infinity,
+                     };
     const ret = {
         atol: withDefault(control.atol, defaults.atol),
         maxSteps: withDefault(control.maxSteps, defaults.maxSteps),
         rtol: withDefault(control.rtol, defaults.rtol),
+        stepSizeMax: withDefault(control.stepSizeMax, defaults.stepSizeMax),
+        stepSizeMin: withDefault(control.stepSizeMin, defaults.stepSizeMin),
+        stepSizeMinAllow: withDefault(control.stepSizeMinAllow,
+                                      defaults.stepSizeMinAllow),
         stiffCheck: withDefault(control.stiffCheck, defaults.stiffCheck),
         tcrit: withDefault(control.tcrit, defaults.tcrit),
-        stepSizeMin: withDefault(control.stepSizeMin, defaults.stepSizeMin),
-        stepSizeMax: withDefault(control.stepSizeMax, defaults.stepSizeMax),
-        stepSizeMinAllow: withDefault(control.stepSizeMinAllow,
-                                      defaults.stepSizeMinAllow)
     };
 
     if (ret.maxSteps < 1) {
