@@ -1,5 +1,3 @@
-import * as fs from "fs";
-
 const SQRT_DBL_EPSILON = Math.pow(2, -52 / 2);
 
 export function square(x: number): number {
