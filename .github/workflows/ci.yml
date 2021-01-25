@@ -18,6 +18,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 15.x
+      - run: npm install
       - run: npm run-script build
       - run: npm install codecov -g
       - run: npm run-script test
