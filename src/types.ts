@@ -7,8 +7,6 @@ export type OutputFn = null | ((t: number, y: number[]) => number[]);
 
 export interface DopriStepControl {
     beta: number;
-    sizeMin: number;
-    sizeMax: number;
     factorSafe: number;
     factorMin: number;
     factorMax: number;

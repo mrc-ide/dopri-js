@@ -1,5 +1,3 @@
-import * as fs from "fs";
-
 const SQRT_DBL_EPSILON = Math.pow(2, -52 / 2);
 
 export function square(x: number): number {
@@ -72,10 +70,6 @@ export function seqLen(a: number, b: number, len: number): number[] {
         ret.push((1 - p) * a + p * b);
     }
     return ret;
-}
-
-export function last<T>(x: T[]): T {
-    return x[x.length - 1];
 }
 
 // See richfitz/ring:inst/include/ring/ring.c - this is closely based

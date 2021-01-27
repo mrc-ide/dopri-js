@@ -69,52 +69,6 @@ describe('integrate logistic', () => {
 });
 
 
-// The issue here is that jsonlite is not saving *all* the precision,
-// in the same way that node is saving.  That makes it impossible to
-// compare as exactly as I can going the other way.
-//
-// actually, things are quite different after 7 steps (the first
-// discrepency creeps in for the first two values.  Then things settle
-// in ok and we get the departure of accuracy at t between 2.25 and
-// 2.5 - after that the differences of 1e-15 or so persist.  The
-// rejected steps are at 0.13 and 6.67 so I don't think that's the
-// problem either.
-describe('integrate lorenz', () => {
-    it ('agrees with reference', () => {
-        var t = utils.seqLen(0, 25, 101);
-        var y0 = [10, 1, 1];
-
-        var sol = dopri.integrate(examples.lorenzRhs(), y0, 0, utils.last(t));
-        var y = sol(t);
-
-        var pathRefJs = "test/ref/lorenz_js.json";
-        var pathRefR = "test/ref/lorenz_r.json";
-
-        if (!fs.existsSync(pathRefJs)) {
-            fs.writeFileSync(pathRefJs, JSON.stringify(y));
-        }
-
-        var cmpJs = JSON.parse(fs.readFileSync(pathRefJs));
-        var cmpR = JSON.parse(fs.readFileSync(pathRefR));
-
-        // This one should just straight up agree:
-        expect(y).to.deep.equal(cmpJs);
-
-        // This one is more complicated:
-        for (var i = 0; i < t.length - 1; ++i) {
-            expect(utils.approxEqualArray(y[i], cmpR[i])).to.eql(true);
-        }
-        // Last one is due to interpolation error - the R version
-        // stops the integrator on the point and the js version allows
-        // us to exceed the point at the moment.
-        expect(utils.approxEqualArray(y[100], cmpR[100], 1e-6)).
-            to.eql(true);
-        expect(utils.approxEqualArray(y[100], cmpR[100], 1e-8)).
-            to.eql(false);
-    });
-});
-
-
 describe('Exceed max steps', () => {
     it('Throws when max steps exceeded', () => {
         var ctl = {maxSteps: 5};
@@ -126,19 +80,34 @@ describe('Exceed max steps', () => {
 
 
 describe('Step size too small', () => {
-    it('Throws when max steps exceeded', () => {
-        var solver = new dopri.Dopri(examples.flameRhs, 1);
+    it('Throws when step size becomes too small', () => {
+        var ctl = {stepSizeMin: 0.1};
+        var solver = new dopri.Dopri(examples.flameRhs, 1, ctl);
         solver.initialise(0, [0.1]);
-        solver._stepper.stepControl.sizeMin = 0.1;
         expect(() => solver.run(100)).to.throw("step too small");
+    });
+
+    // This is easier to verify with Lorenz than flame
+    it('Can continue if told that is ok', () => {
+        var ctl = {stepSizeMin: 0.01, stepSizeMinAllow: true};
+        var solver = new dopri.Dopri(examples.lorenzRhs(), 3, ctl);
+        solver.initialise(0, [10, 1, 1]);
+        solver.run(1);
+
+        var min_diff = Infinity;
+        var history = solver._history;
+        for (var i = 1; i < history.length; ++i) {
+            min_diff = Math.min(min_diff, history[i].t - history[i - 1].t);
+        }
+        expect(min_diff).to.eql(0.01);
     });
 });
 
 
 describe('Step size vanished', () => {
-    it('Throws when max steps exceeded', () => {
+    it('Throws when step size vanishes', () => {
         var solver = new dopri.Dopri(examples.exponentialRhs([0.5]), 1);
-        var h = solver._stepper.stepControl.sizeMin;
+        var h = solver._control.stepSizeMin;
 
         solver.initialise(h / 2**(-52), [0.1]);
         solver._h = h;
