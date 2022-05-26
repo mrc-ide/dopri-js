@@ -33,8 +33,7 @@ export function integrate(rhs: RhsFn | RhsFnDelayed, y: number[],
             throw new Error("Can't used delayed output with non-delayed rhs");
         }
         return integrate_dopri(rhs, y, t0, t1, control, output);
-    }
-    if (isRhsFnDelayed(rhs)) {
+    } else {
         if (!isOutputFnDelayed(output)) {
             throw new Error("Can't used non-delayed output with delayed rhs");
         }

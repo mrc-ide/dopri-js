@@ -1,16 +1,14 @@
-'use strict';
-var expect = require('chai').expect;
-var examples = require('../lib/examples.js');
-var utils = require('../lib/utils.js');
+import {lorenzRhs} from "../src/examples";
+import {approxEqualArray} from "../src/utils";
 
 describe('lorenz function', () => {
     it('is correct with known cases', () => {
         const y = [10.0, 1.0, 1.0];
         const dy = [0,0,0];
-        var lorenz = examples.lorenzRhs();
+        var lorenz = lorenzRhs();
         lorenz(0, y, dy);
         // This seems hard to get right:
         var ref = [-90.0, 269.0, 22 / 3];
-        expect(utils.approxEqualArray(dy, ref)).to.eql(true);
+        expect(approxEqualArray(dy, ref)).toBe(true);
     });
 });
