@@ -27,8 +27,8 @@ export class DDE extends Dopri {
     }
 
     public initialise(t: number, y: number[]): DDE {
-        super.initialise(t, y);
         this._y0 = y;
+        super.initialise(t, y);
         return this;
     }
 

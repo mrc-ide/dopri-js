@@ -58,3 +58,29 @@ describe('Interface', () => {
         expect(yDDE).to.deep.eql(yODE);
     });
 });
+
+
+describe('Delay differential equations', () => {
+    it("Can solve a system of ddes", () => {
+        var y0 = [0, 0];
+        var rhsDDE = function(t, y, dydt, solution) {
+            dydt[0] = 1;
+            dydt[1] = solution(t - 1)[0];
+        }
+        var rhsODE = function(t, y, dydt) {
+            dydt[0] = 1;
+            dydt[1] = t > 1 ? t - 1 : 0;
+        }
+        var t = utils.seqLen(0, 5, 11);
+        var y = dde.integrate(rhsDDE, y0, 0, 5, {}, null)(t);
+        var cmp = dde.integrate(rhsODE, y0, 0, 5, {}, null)(t);
+
+        var extract = function(v, i) {
+            return v.map((el) => el[i])
+        }
+        expect(utils.approxEqualArray(extract(y, 0), extract(cmp, 0)))
+            .to.eql(true);
+        expect(utils.approxEqualArray(extract(y, 1), extract(cmp, 1)))
+            .to.eql(true);
+    });
+})
