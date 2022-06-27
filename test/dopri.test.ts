@@ -55,7 +55,6 @@ describe("integrate exponential", () => {
     });
 });
 
-
 describe("integrate logistic", () => {
     it("agrees with solution", () => {
         const y0 = [1];
@@ -69,7 +68,6 @@ describe("integrate logistic", () => {
     });
 });
 
-
 describe("Exceed max steps", () => {
     it("Throws when max steps exceeded", () => {
         const ctl = {maxSteps: 5};
@@ -78,7 +76,6 @@ describe("Exceed max steps", () => {
         expect(() => solver.run(100)).toThrow("too many steps");
     });
 });
-
 
 describe("Step size too small", () => {
     it("Throws when step size becomes too small", () => {
@@ -104,20 +101,18 @@ describe("Step size too small", () => {
     });
 });
 
-
 describe("Step size vanished", () => {
     it("Throws when step size vanishes", () => {
         const solver = new dopri.Dopri(examples.exponentialRhs([0.5]), 1);
         const h = solver["_control"].stepSizeMin;
 
-        solver.initialise(h / 2**(-52), [0.1]);
+        solver.initialise(h / 2 ** (-52), [0.1]);
         solver["_h"] = h;
         expect(() => solver["_step"]()).toThrow("step size vanished");
         solver["_h"] = 2 * h;
         expect(() => solver["_step"]()).not.toThrow();
     });
 });
-
 
 describe("stiff systems", () => {
     it("can detect stiff problems", () => {
@@ -130,7 +125,6 @@ describe("stiff systems", () => {
         expect(() => solver.run(t1)).toThrow("problem became stiff");
     });
 });
-
 
 describe("reset stiff check", () => {
     it("can detect stiff problems", () => {
@@ -149,7 +143,6 @@ describe("reset stiff check", () => {
         expect(solver.statistics().stiffNNonstiff).toEqual(0);
     });
 });
-
 
 describe("statistics", () => {
     const solver = new dopri.Dopri(examples.lorenzRhs(), 3);
@@ -188,7 +181,6 @@ describe("statistics", () => {
     });
 });
 
-
 describe("details", () => {
     it("only reject after first successful step", () => {
         const solver = new dopri.Dopri(examples.lorenzRhs(), 3);
@@ -201,18 +193,16 @@ describe("details", () => {
     });
 });
 
-
 describe("no absolute error", () => {
     it("can start integration with no absolute error", () => {
         const rhs = function(t: number, y: number[], dydt: number[]) {
             dydt[0] = 1;
         };
         const sol = dopri.integrate(rhs, [0], 0, 1);
-        const y = sol([1])[0];
-        expect(utils.approxEqualArray(y, [1], 1e-6)).toEqual(true);
+        const ySol = sol([1])[0];
+        expect(utils.approxEqualArray(ySol, [1], 1e-6)).toEqual(true);
     });
 });
-
 
 describe("interface", () => {
     it("accepts control in high-level interface", () => {
@@ -241,20 +231,20 @@ describe("output", () => {
         solver.initialise(0, y0);
         const sol = solver.run(25);
 
-        const t = utils.seqLen(0, 10, 11);
+        const tSol = utils.seqLen(0, 10, 11);
 
-        const y = sol(t);
-        y.forEach((el: number[]) => expect(el[0] + el[1] + el[2])
-                  .toEqual(el[3]));
+        const ySol = sol(tSol);
+        ySol.forEach((el: number[]) => expect(el[0] + el[1] + el[2])
+                     .toEqual(el[3]));
 
         const sol2 = dopri.integrate(rhs, y0, 0, 10, {}, out);
-        const y2 = sol2(t);
-        expect(y2).toEqual(y);
+        const ySol2 = sol2(tSol);
+        expect(ySol2).toEqual(ySol);
     });
 });
 
 describe("tcrit", () => {
-    const ctl = {tcrit: 1}
+    const ctl = {tcrit: 1};
     const rhs = function(t: number, y: number[], dydt: number[]) {
         dydt[0] = 1;
     };
@@ -271,5 +261,5 @@ describe("tcrit", () => {
         solver.initialise(0, [1]);
         solver.run(1);
         expect(solver["_t"]).toBeGreaterThan(1);
-    })
+    });
 });

@@ -2,7 +2,7 @@ import {dopriControl} from "../src/control";
 
 describe("control parameters", () => {
     it("has sensible defaults", () => {
-        var x = dopriControl();
+        const x = dopriControl();
         expect(x.maxSteps).toEqual(10000);
         expect(x.stiffCheck).toEqual(0);
         expect(x.atol).toEqual(1e-6);
@@ -10,14 +10,13 @@ describe("control parameters", () => {
     });
 
     it("accepts one new parameter", () => {
-        var x = dopriControl({maxSteps: 20});
+        const x = dopriControl({maxSteps: 20});
         expect(x.maxSteps).toEqual(20);
         expect(x.stiffCheck).toEqual(0);
     });
 
-
     it("accepts several parameters", () => {
-        var x = dopriControl({atol: 1e-5, stiffCheck: 20});
+        const x = dopriControl({atol: 1e-5, stiffCheck: 20});
         expect(x.maxSteps).toEqual(10000);
         expect(x.atol).toEqual(1e-5);
         expect(x.rtol).toEqual(1e-6);
