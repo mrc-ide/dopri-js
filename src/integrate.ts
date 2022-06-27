@@ -13,14 +13,7 @@ function isOutputFn(output: OutputFn | OutputFnDelayed): output is OutputFn {
     return output === null || output.length === 2;
 }
 
-function isRhsFnDelayed(rhs: RhsFn | RhsFnDelayed): rhs is RhsFnDelayed {
-    //        rhsFn: t, y, dy
-    // rhsFnDelayed: t, y, dy, solution
-    return rhs.length === 4;
-}
-
-function isOutputFnDelayed(output: OutputFn | OutputFnDelayed):
-output is OutputFnDelayed {
+function isOutputFnDelayed(output: OutputFn | OutputFnDelayed): output is OutputFnDelayed {
     return output === null || output.length === 3;
 }
 

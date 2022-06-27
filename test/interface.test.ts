@@ -1,4 +1,5 @@
-import {Dopri, integrate} from "../src/index";
+import {Dopri} from "../src/dopri";
+import {integrate} from "../src/integrate";
 
 describe('High level use', () => {
     var rhs = function(t: number, y: number[], dydt: number[]) {

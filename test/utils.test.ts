@@ -1,6 +1,6 @@
 import * as utils from "../src/utils";
 
-describe('square function', () => {
+describe("square function", () => {
     it('is correct with known cases', () => {
         expect(utils.square(2)).toEqual(4);
         expect(utils.square(-9)).toEqual(81);
