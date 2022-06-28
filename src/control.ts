@@ -26,7 +26,8 @@ export interface DopriControlParam {
     stiffCheck: number;
     /** A critical time that the solver must stop at. Use this if your
      *  system has a singularity that it must not step past (typically
-     *  at the end of the simulation */
+     *  at the end of the simulation).
+     */
     tcrit: number;
     /** The minimum allowed step size. If not given then we allow
      *  steps to reduce close to the limit of machine precision. If

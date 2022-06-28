@@ -119,7 +119,6 @@ export type InterpolatedSolution = (t: number) => number[];
 export type RhsFnDelayed = (t: number, y: number[], dy: number[],
                             solution: InterpolatedSolution) => void;
 
-
 /**
  * The function type for computing additional quantities based on the
  * solution, but which are not expressed in terms of derivatives. This
