@@ -19,7 +19,7 @@ describe("integrate exponential", () => {
         const y0 = [1];
         const r = [-0.5];
         const t = utils.seqLen(0, 25, 101);
-        const sol = dopri.integrate(examples.exponentialRhs(r), y0, 0, 25);
+        const sol = dopri.integrateDopri(examples.exponentialRhs(r), y0, 0, 25);
         const y1 = sol(t);
         const y2 = examples.exponentialSolution(r, y0, t);
         expect(utils.approxEqualArray(flatten(y1), flatten(y2), 1e-6))
@@ -29,7 +29,7 @@ describe("integrate exponential", () => {
     it("works for multidimensional problems", () => {
         const r = [-0.5, 0, 0.5];
         const y0 = [1, 1, 1];
-        const sol = dopri.integrate(examples.exponentialRhs(r), y0, 0, 25);
+        const sol = dopri.integrateDopri(examples.exponentialRhs(r), y0, 0, 25);
 
         const t = utils.seqLen(0, 25, 101);
         const y1 = sol(t);
@@ -47,7 +47,7 @@ describe("integrate exponential", () => {
         const y0 = [0];
         const r = [0];
         const t = utils.seqLen(0, 25, 101);
-        const sol = dopri.integrate(examples.exponentialRhs(r), y0, 0, 25);
+        const sol = dopri.integrateDopri(examples.exponentialRhs(r), y0, 0, 25);
         const y1 = sol(t);
         const y2 = examples.exponentialSolution(r, y0, t);
         expect(utils.approxEqualArray(flatten(y1), flatten(y2), 1e-6))
@@ -61,7 +61,7 @@ describe("integrate logistic", () => {
         const r = 0.5;
         const K = 100;
         const t = utils.seqLen(0, 25, 101);
-        const sol = dopri.integrate(examples.logisticRhs(r, K), y0, 0, 25);
+        const sol = dopri.integrateDopri(examples.logisticRhs(r, K), y0, 0, 25);
         const y1 = sol(t);
         const y2 = examples.logisticSolution(r, K, y0[0], t);
         expect(utils.approxEqualArray(flatten(y1), y2, 1e-6)).toBe(true);
@@ -198,7 +198,7 @@ describe("no absolute error", () => {
         const rhs = function(t: number, y: number[], dydt: number[]) {
             dydt[0] = 1;
         };
-        const sol = dopri.integrate(rhs, [0], 0, 1);
+        const sol = dopri.integrateDopri(rhs, [0], 0, 1);
         const ySol = sol([1])[0];
         expect(utils.approxEqualArray(ySol, [1], 1e-6)).toEqual(true);
     });
@@ -212,8 +212,8 @@ describe("interface", () => {
         const rhs = examples.lorenzRhs();
         const solver = new dopri.Dopri(rhs, 3, ctl);
         const y1 = solver.initialise(0, y0).run(25)(t);
-        const y2 = dopri.integrate(rhs, y0, 0, 25, ctl)(t);
-        const y3 = dopri.integrate(rhs, y0, 0, 25)(t);
+        const y2 = dopri.integrateDopri(rhs, y0, 0, 25, ctl)(t);
+        const y3 = dopri.integrateDopri(rhs, y0, 0, 25)(t);
         expect(y2).toEqual(y1);
         expect(y3).not.toEqual(y1);
     });
@@ -237,7 +237,7 @@ describe("output", () => {
         ySol.forEach((el: number[]) => expect(el[0] + el[1] + el[2])
                      .toEqual(el[3]));
 
-        const sol2 = dopri.integrate(rhs, y0, 0, 10, {}, out);
+        const sol2 = dopri.integrateDopri(rhs, y0, 0, 10, {}, out);
         const ySol2 = sol2(tSol);
         expect(ySol2).toEqual(ySol);
     });

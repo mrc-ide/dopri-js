@@ -3,15 +3,20 @@ import {Dopri} from "./dopri";
 import {HistoryElement, OutputFnDelayed, RhsFnDelayed} from "./types";
 import {search} from "./utils";
 
-export function integrate(rhs: RhsFnDelayed, y: number[],
-                          t0: number, t1: number,
-                          control: Partial<DopriControlParam> = {},
-                          output: OutputFnDelayed = null) {
+/** {@inheritDoc integrateDopri} */
+export function integrateDDE(rhs: RhsFnDelayed, y: number[],
+                             t0: number, t1: number,
+                             control: Partial<DopriControlParam> = {},
+                             output: OutputFnDelayed = null) {
     const solver = new DDE(rhs, y.length, control, output);
     solver.initialise(t0, y);
     return solver.run(t1);
 }
 
+/**
+ * Integrator for delay differential equations. For integrating
+ * ordinary differential equations, see {@link Dopri}.
+ */
 export class DDE extends Dopri {
     private _y0: number[];
     constructor(rhs: RhsFnDelayed, n: number,

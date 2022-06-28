@@ -1,8 +1,10 @@
-## Dormand–Prince method in javascript
+## Dormand–Prince method in JavaScript
 
-[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![build-and-test](https://github.com/mrc-ide/dopri-js/actions/workflows/ci.yml/badge.svg)](https://github.com/mrc-ide/dopri-js/actions/workflows/ci.yml)
 [![codecov.io](https://codecov.io/github/mrc-ide/dopri-js/coverage.svg?branch=master)](https://codecov.io/github/mrc-ide/dopri-js?branch=master)
+
+A simple adaptive ordinary differential equation (ODE) and delay differential equation (DDE) solver in TypeScript, based on the 5th order Dormand-Prince method.
 
 ## Licence
 
