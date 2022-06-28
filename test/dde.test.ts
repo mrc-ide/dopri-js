@@ -46,8 +46,8 @@ describe("Interface", () => {
         const K = 100;
         const rhs = logisticRhs(r, K);
         const t = utils.seqLen(0, 10, 11);
-        const yODE = dopri.integrate(rhs, y0, 0, 10)(t);
-        const yDDE = dde.integrate(rhs, y0, 0, 10)(t);
+        const yODE = dopri.integrateDopri(rhs, y0, 0, 10)(t);
+        const yDDE = dde.integrateDDE(rhs, y0, 0, 10)(t);
         expect(yDDE).toEqual(yODE);
     });
 
@@ -59,8 +59,8 @@ describe("Interface", () => {
         const out = (t: number, y: number[]) => [y[0] / 2];
         const tSol = utils.seqLen(0, 10, 11);
         const ctl = {atol: 1e-3, rtol: 1e-3};
-        const yODE = dopri.integrate(rhs, y0, 0, 10, ctl, out)(tSol);
-        const yDDE = dde.integrate(rhs, y0, 0, 10, ctl, out)(tSol);
+        const yODE = dopri.integrateDopri(rhs, y0, 0, 10, ctl, out)(tSol);
+        const yDDE = dde.integrateDDE(rhs, y0, 0, 10, ctl, out)(tSol);
         expect(yDDE).toEqual(yODE);
     });
 });
@@ -78,8 +78,8 @@ describe("Delay differential equations", () => {
             dydt[1] = t > 1 ? t - 1 : 0;
         };
         const tSol = utils.seqLen(0, 5, 11);
-        const ySol = dde.integrate(rhsDDE, y0, 0, 5, {}, null)(tSol);
-        const cmp = dde.integrate(rhsODE, y0, 0, 5, {}, null)(tSol);
+        const ySol = dde.integrateDDE(rhsDDE, y0, 0, 5, {}, null)(tSol);
+        const cmp = dde.integrateDDE(rhsODE, y0, 0, 5, {}, null)(tSol);
 
         const extract = (v: number[][], i: number) =>
             v.map((el: number[]) => el[i]);
