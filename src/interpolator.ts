@@ -2,6 +2,15 @@ import {History, OutputFn, Stepper} from "./types";
 
 export function interpolator(history: History, stepper: Stepper,
                              output: OutputFn) {
+    /**
+     * This is essentially a vectorised version of {@link
+     * InterpolatedSolution}, accepting a vector of times.
+     *
+     * @param t Vector of times to request the solution at
+     *
+     * @return A vector of vectors; element `[i][j]` is the `j`th
+     * variable at the `i`th time in `t`
+     */
     return (t: number[]) => interpolate(t, history, stepper, output);
 }
 

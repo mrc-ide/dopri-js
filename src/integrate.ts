@@ -1,6 +1,6 @@
 import {DopriControlParam} from "./control";
-import {integrate as integrate_dde} from "./dde";
-import {integrate as integrate_dopri} from "./dopri";
+import {integrateDDE} from "./dde";
+import {integrateDopri} from "./dopri";
 import {OutputFn, OutputFnDelayed, RhsFn, RhsFnDelayed} from "./types";
 
 function isRhsFn(rhs: RhsFn | RhsFnDelayed): rhs is RhsFn {
@@ -25,11 +25,11 @@ export function integrate(rhs: RhsFn | RhsFnDelayed, y: number[],
         if (!isOutputFn(output)) {
             throw new Error("Can't used delayed output with non-delayed rhs");
         }
-        return integrate_dopri(rhs, y, t0, t1, control, output);
+        return integrateDopri(rhs, y, t0, t1, control, output);
     } else {
         if (!isOutputFnDelayed(output)) {
             throw new Error("Can't used non-delayed output with delayed rhs");
         }
-        return integrate_dde(rhs, y, t0, t1, control, output);
+        return integrateDDE(rhs, y, t0, t1, control, output);
     }
 }

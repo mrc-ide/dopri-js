@@ -8,10 +8,27 @@ import * as utils from "./utils";
 const DBL_EPSILON = Math.pow(2, -52); // = 2.220446049250313e-16
 const STEP_FACTOR_MIN = 1e-4;
 
-export function integrate(rhs: RhsFn, y: number[],
-                          t0: number, t1: number,
-                          control: Partial<DopriControlParam> = {},
-                          output: OutputFn = null) {
+/**
+ * High-level convenience interface. Use this to create an integrator
+ * and immediately use it once to solve a system over some time range.
+ *
+ * @param rhs The right hand side function to integrate
+ *
+ * @param y The initial conditions for the system
+ *
+ * @param t0 The start time of the integration
+ *
+ * @param t1 The end time of the integration
+ *
+ * @param control Optional control parameters to tune the integration
+ *
+ * @param output Optional output function, to compute additional
+ * quantities related to the integration alongside the solution
+ */
+export function integrateDopri(rhs: RhsFn, y: number[],
+                               t0: number, t1: number,
+                               control: Partial<DopriControlParam> = {},
+                               output: OutputFn = null) {
     const solver = new Dopri(rhs, y.length, control, output);
     solver.initialise(t0, y);
     return solver.run(t1);
@@ -21,6 +38,29 @@ function integrationError(message: string, t: number) {
     return new Error(`Integration failure: ${message} at ${t}`);
 }
 
+/**
+ * Basic Dormand–Prince integrator class for solving ordinary
+ * differential equations. For delay differential equations, see
+ * {@link DDE}.
+ *
+ * @example
+ * ```typescript
+ * function lorenz(t: number, y: number[], dydt: number[]) {
+ *     const y1 = y[0];
+ *     const y2 = y[1];
+ *     const y3 = y[2];
+ *     dydt[0] = 10 * (y2 - y1);
+ *     dydt[1] = 28 * y1 - y2 - y1 * y3;
+ *     dydt[2] = -8 / 3 * y3 + y1 * y2;
+ * };
+ *
+ * const solver = new Dopri(lorenz, 3);
+ * solver.initialise(0, [10, 1, 1]);
+ * const solution = solver.run(10);
+ * const t = [0, 1, 2, 3, 4, 5, 6, 7, 8, 10];
+ * const y = solution(t);
+ * ```
+ */
 export class Dopri implements Integrator {
     protected _stepper: Stepper;
     protected _history: History = [];
@@ -39,6 +79,16 @@ export class Dopri implements Integrator {
     private _stiffNNonstiff: number = 0;
     private _lastError: number = 0;
 
+    /**
+     * @param rhs The right hand side function to be integrated
+     *
+     * @param n The number of variables in the system to be integrated
+     *
+     * @param control Optional control parameters to tune the integration
+     *
+     * @param output Optional output function, to compute additional
+     * quantities related to the integration alongside the solution
+     */
     constructor(rhs: RhsFn, n: number,
                 control: Partial<DopriControlParam> = {},
                 output: OutputFn = null) {
@@ -47,6 +97,13 @@ export class Dopri implements Integrator {
         this._output = output;
     }
 
+    /**
+     * Initialise the solver
+     *
+     * @param t The time to start integrating from
+     *
+     * @param y The initial conditions
+     */
     public initialise(t: number, y: number[]): Dopri {
         const n = this._stepper.n;
         if (y.length !== n) {
@@ -62,6 +119,11 @@ export class Dopri implements Integrator {
         return this;
     }
 
+    /**
+     * Integrate the solution through to some time
+     *
+     * @param tEnd End time of the integration
+     */
     public run(tEnd: number) {
         while (this._t < tEnd) {
             this._step();
@@ -71,14 +133,24 @@ export class Dopri implements Integrator {
                             this._output);
     }
 
+    /**
+     * Return statistics about the integration so far
+     */
     public statistics() {
         return {
+            /** The last estimated error in the solution */
             lastError: this._lastError,
+            /** The number of evaluations of the rhs function */
             nEval: this._stepper.nEval,
+            /** The number of steps attempted */
             nSteps: this._nSteps,
+            /** The number of steps accepted */
             nStepsAccepted: this._nStepsAccepted,
+            /** The number of steps rejected */
             nStepsRejected: this._nStepsRejected,
+            /** The number of stiff checks that were non-stiff */
             stiffNNonstiff: this._stiffNNonstiff,
+            /** The number of stiff checks that were stiff */
             stiffNStiff: this._stiffNStiff,
         };
     }
