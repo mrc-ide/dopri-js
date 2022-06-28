@@ -1,10 +1,15 @@
 {
-  "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "declaration": true,
-    "outDir": "./lib",
-    "sourceMap": true,
-    "strict": true
-  }
+    "compilerOptions": {
+        "target": "es5",
+        "module": "esnext",
+        "esModuleInterop": true,
+        "declaration": true,
+        "outDir": "./lib",
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "strict": true
+    },
+    "include": [
+        "src"
+    ]
 }

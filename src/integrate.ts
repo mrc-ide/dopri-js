@@ -13,14 +13,7 @@ function isOutputFn(output: OutputFn | OutputFnDelayed): output is OutputFn {
     return output === null || output.length === 2;
 }
 
-function isRhsFnDelayed(rhs: RhsFn | RhsFnDelayed): rhs is RhsFnDelayed {
-    //        rhsFn: t, y, dy
-    // rhsFnDelayed: t, y, dy, solution
-    return rhs.length === 4;
-}
-
-function isOutputFnDelayed(output: OutputFn | OutputFnDelayed):
-output is OutputFnDelayed {
+function isOutputFnDelayed(output: OutputFn | OutputFnDelayed): output is OutputFnDelayed {
     return output === null || output.length === 3;
 }
 
@@ -33,8 +26,7 @@ export function integrate(rhs: RhsFn | RhsFnDelayed, y: number[],
             throw new Error("Can't used delayed output with non-delayed rhs");
         }
         return integrate_dopri(rhs, y, t0, t1, control, output);
-    }
-    if (isRhsFnDelayed(rhs)) {
+    } else {
         if (!isOutputFnDelayed(output)) {
             throw new Error("Can't used non-delayed output with delayed rhs");
         }
