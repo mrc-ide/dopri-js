@@ -74,6 +74,10 @@ export function dopriControl(control: Partial<DopriControlParam> = {}) {
         tcrit: withDefault(control.tcrit, defaults.tcrit),
     };
 
+    if (ret.tcrit.length > 0) {
+        ret.tcrit = [...ret.tcrit].sort();
+    }
+
     if (ret.maxSteps < 1) {
         throw controlError("maxSteps", "must be at least 1");
     }

@@ -45,4 +45,11 @@ describe("validate inputs", () => {
         expect(() => {dopriControl({rtol: 0});}).
             toThrow("'rtol' must be strictly positive");
     });
+
+    it("accepts and sorts critical times", () => {
+        expect(dopriControl({tcrit: []}).tcrit).toStrictEqual([]);
+        expect(dopriControl({tcrit: [1]}).tcrit).toStrictEqual([1]);
+        expect(dopriControl({tcrit: [1, 2]}).tcrit).toStrictEqual([1, 2]);
+        expect(dopriControl({tcrit: [2, 1]}).tcrit).toStrictEqual([1, 2]);
+    });
 });
