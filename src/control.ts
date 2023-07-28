@@ -24,11 +24,12 @@ export interface DopriControlParam {
      *  in terms of steps
      */
     stiffCheck: number;
-    /** A critical time that the solver must stop at. Use this if your
-     *  system has a singularity that it must not step past (typically
-     *  at the end of the simulation).
+    /** An artray of critical times that the solver must stop at. Use
+     *  this if your system has a singularity that it must not step
+     *  past (typically at the end of the simulation), or
+     *  discontinuities in any derivatives.
      */
-    tcrit: number;
+    tcrit: number[];
     /** The minimum allowed step size. If not given then we allow
      *  steps to reduce close to the limit of machine precision. If
      *  the integration attempts to make a step smaller than this, it
@@ -59,7 +60,7 @@ export function dopriControl(control: Partial<DopriControlParam> = {}) {
                       stepSizeMin: 1e-8,
                       stepSizeMinAllow: false,
                       stiffCheck: 0,
-                      tcrit: Infinity,
+                      tcrit: [],
                      };
     const ret = {
         atol: withDefault(control.atol, defaults.atol),

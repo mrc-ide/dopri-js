@@ -172,6 +172,9 @@ export class Dopri implements Integrator {
         const facOld = Math.max(this._lastError, 1e-4);
         const stepControl = this._stepper.stepControl;
         const control = this._control;
+        const tcrit = control.tcrit;
+        let tcritIdx = 0;
+        let tcritNext = tcrit.length <= tcritIdx ? Infinity : tcrit[tcritIdx];
 
         while (!success) {
             let forceThisStep = false;
@@ -189,8 +192,12 @@ export class Dopri implements Integrator {
             if (h <= Math.abs(t) * DBL_EPSILON) {
                 throw integrationError("step size vanished", t);
             }
-            if (t + h > control.tcrit) {
-                h = control.tcrit - t;
+            if (t >= tcritNext) {
+                tcritIdx++;
+                tcritNext = tcrit.length <= tcritIdx ? Infinity : tcrit[tcritIdx];
+            }
+            if (t + h > tcritNext) {
+                h = tcritNext - t;
             }
 
             // Carry out the step
