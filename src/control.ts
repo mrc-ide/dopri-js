@@ -24,7 +24,7 @@ export interface DopriControlParam {
      *  in terms of steps
      */
     stiffCheck: number;
-    /** An artray of critical times that the solver must stop at. Use
+    /** An array of critical times that the solver must stop at. Use
      *  this if your system has a singularity that it must not step
      *  past (typically at the end of the simulation), or
      *  discontinuities in any derivatives.
@@ -75,6 +75,7 @@ export function dopriControl(control: Partial<DopriControlParam> = {}) {
     };
 
     if (ret.tcrit.length > 0) {
+        // copy so that we never mutate the argument we were passed
         ret.tcrit = [...ret.tcrit].sort();
     }
 

@@ -97,7 +97,7 @@ export class Dopri implements Integrator {
         this._stepper = new dopri5.Dopri5(rhs, n);
         this._control = dopriControl(control);
         this._output = output;
-        this._tcrit = [...this._control.tcrit];
+        this._tcrit = this._control.tcrit;
     }
 
     /**
@@ -173,15 +173,14 @@ export class Dopri implements Integrator {
     }
 
     private _nextTcrit(): number {
+        // Early exit for most common case, skip needing to
+        // filter/create each step:
         if (this._tcrit.length === 0) {
             return Infinity;
         }
-        const nextTcrit = this._tcrit[0];
-        if (nextTcrit > this._t) {
-            return nextTcrit;
-        }
-        this._tcrit = this._tcrit.slice(1);
-        return this._nextTcrit();
+        // Otherwise filter down to critical times in the future
+        this._tcrit = this._tcrit.filter((time) => time > this._t);
+        return this._tcrit.length === 0 ? Infinity : this._tcrit[0];
     }
 
     private _step() {
