@@ -244,7 +244,7 @@ describe("output", () => {
 });
 
 describe("tcrit", () => {
-    const ctl = {tcrit: 1};
+    const ctl = {tcrit: [1]};
     const rhs = function(t: number, y: number[], dydt: number[]) {
         dydt[0] = 1;
     };
@@ -261,5 +261,26 @@ describe("tcrit", () => {
         solver.initialise(0, [1]);
         solver.run(1);
         expect(solver["_t"]).toBeGreaterThan(1);
+    });
+
+    it("copes with a vector of critical times", () => {
+        const rhs = function(t: number, y: number[], dydt: number[]) {
+            dydt[0] = t >= 5 && t < 6 ? 1 : 0;
+        }
+        const solver = new dopri.Dopri(rhs, 1, {tcrit: [5, 6]});
+        solver.initialise(0, [1]);
+        let sol = solver.run(10);
+
+        const tSol = [0, 1, 5, 5.5, 6, 6.5, 7];
+        const ySol = sol(tSol);
+
+        const t = solver.steps();
+        expect(t.includes(5)).toBe(true);
+        expect(t.includes(6)).toBe(true);
+        expect(t.includes(4)).toBe(false);
+        expect(t.includes(7)).toBe(false);
+
+        const cmp = [1, 1, 1, 1.5, 2, 2, 2];
+        expect(utils.approxEqualArray(flatten(ySol), cmp, 1e-4)).toBe(true);
     });
 });

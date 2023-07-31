@@ -79,6 +79,8 @@ export class Dopri implements Integrator {
     private _stiffNNonstiff: number = 0;
     private _lastError: number = 0;
 
+    private _tcrit: number[];
+
     /**
      * @param rhs The right hand side function to be integrated
      *
@@ -95,6 +97,7 @@ export class Dopri implements Integrator {
         this._stepper = new dopri5.Dopri5(rhs, n);
         this._control = dopriControl(control);
         this._output = output;
+        this._tcrit = this._control.tcrit;
     }
 
     /**
@@ -155,6 +158,10 @@ export class Dopri implements Integrator {
         };
     }
 
+    public steps(): number[] {
+        return this._history.map((el) => el.t);
+    }
+
     private _reset() {
         this._nSteps = 0;
         this._nStepsAccepted = 0;
@@ -162,6 +169,18 @@ export class Dopri implements Integrator {
         this._stiffNStiff = 0;
         this._stiffNNonstiff = 0;
         this._lastError = 0;
+        this._tcrit = [...this._control.tcrit];
+    }
+
+    private _nextTcrit(): number {
+        // Early exit for most common case, skip needing to
+        // filter/create each step:
+        if (this._tcrit.length === 0) {
+            return Infinity;
+        }
+        // Otherwise filter down to critical times in the future
+        this._tcrit = this._tcrit.filter((time) => time > this._t);
+        return this._tcrit.length === 0 ? Infinity : this._tcrit[0];
     }
 
     private _step() {
@@ -172,6 +191,7 @@ export class Dopri implements Integrator {
         const facOld = Math.max(this._lastError, 1e-4);
         const stepControl = this._stepper.stepControl;
         const control = this._control;
+        const tcrit = this._nextTcrit();
 
         while (!success) {
             let forceThisStep = false;
@@ -189,8 +209,8 @@ export class Dopri implements Integrator {
             if (h <= Math.abs(t) * DBL_EPSILON) {
                 throw integrationError("step size vanished", t);
             }
-            if (t + h > control.tcrit) {
-                h = control.tcrit - t;
+            if (t + h > tcrit) {
+                h = tcrit - t;
             }
 
             // Carry out the step
