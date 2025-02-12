@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "Dormand–Prince methods",
     "main": "dist/dopri.js",
+    "type": "module",
     "types": "dist/index.d.ts",
     "files": [
         "/dist"
