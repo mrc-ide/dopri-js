@@ -20,9 +20,11 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm install codecov -g
-      - run: npm run test
+      - run: npm run coverage
       - run: npm run lint
       - run: npm run docs
       - uses: codecov/codecov-action@v4
         with:
-          files: coverage/*.json
+          fail_ci_if_error: true
+          files: ./coverage/coverage-final.json
+          token: ${{ secrets.CODECOV_TOKEN }}

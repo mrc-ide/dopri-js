@@ -11,6 +11,7 @@
     "scripts": {
         "build": "tsc && vite build",
         "test": "vitest",
+        "coverage": "vitest --coverage",
         "docs": "typedoc",
         "lint": "tslint -c tslint.json 'src/**/*.ts'"
     },
