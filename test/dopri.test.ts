@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import * as dopri from "../src/dopri";
 import * as examples from "../src/examples";
 import * as utils from "../src/utils";

@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import {dopriControl} from "../src/control";
 
 describe("control parameters", () => {
