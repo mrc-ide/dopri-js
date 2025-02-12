@@ -1,6 +1,7 @@
 import {History, HistoryElement} from "./history";
 import * as interpolator from "./interpolator";
-export {History, HistoryElement};
+export type {History};
+export {HistoryElement};
 
 /**
  * The function type for ODE right-hand-side functions, passed through
