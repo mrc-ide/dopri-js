@@ -265,12 +265,12 @@ describe("tcrit", () => {
     });
 
     it("copes with a vector of critical times", () => {
-        const rhs = function(t: number, y: number[], dydt: number[]) {
+        const testRhs = function(t: number, y: number[], dydt: number[]) {
             dydt[0] = t >= 5 && t < 6 ? 1 : 0;
         }
-        const solver = new dopri.Dopri(rhs, 1, {tcrit: [5, 6]});
+        const solver = new dopri.Dopri(testRhs, 1, {tcrit: [5, 6]});
         solver.initialise(0, [1]);
-        let sol = solver.run(10);
+        const sol = solver.run(10);
 
         const tSol = [0, 1, 5, 5.5, 6, 6.5, 7];
         const ySol = sol(tSol);

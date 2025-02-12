@@ -6,7 +6,6 @@ import * as utils from "./utils";
 
 // needed for ES5 - will be ~= Number.EPSILON in ES6
 const DBL_EPSILON = Math.pow(2, -52); // = 2.220446049250313e-16
-const STEP_FACTOR_MIN = 1e-4;
 
 /**
  * High-level convenience interface. Use this to create an integrator
@@ -194,14 +193,12 @@ export class Dopri implements Integrator {
         const tcrit = this._nextTcrit();
 
         while (!success) {
-            let forceThisStep = false;
             if (this._nSteps > control.maxSteps) {
                 throw integrationError("too many steps", t);
             }
             if (h < control.stepSizeMin) {
                 if (control.stepSizeMinAllow) {
                     h = control.stepSizeMin;
-                    forceThisStep = true;
                 } else {
                     throw integrationError("step too small", t);
                 }

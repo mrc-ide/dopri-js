@@ -1,5 +1,4 @@
 import {History, HistoryElement} from "./history";
-import * as interpolator from "./interpolator";
 export type {History};
 export {HistoryElement};
 

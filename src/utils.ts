@@ -63,7 +63,6 @@ export function approxEqualArray(x: number[], y: number[],
 }
 
 export function seqLen(a: number, b: number, len: number): number[] {
-    const d = (a - b) / (len - 1);
     const ret = [];
     for (let i = 0; i < len; ++i) {
         const p = i / (len - 1);
