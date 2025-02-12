@@ -19,7 +19,6 @@ jobs:
                   node-version: 22.x
             - run: npm ci
             - run: npm run build
-            - run: npm install codecov -g
             - run: npm run coverage
             - run: npm run lint
             - run: npm run format-check
