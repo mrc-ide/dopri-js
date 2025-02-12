@@ -24,8 +24,7 @@ export function zeros(n: number): number[] {
     return ret;
 }
 
-export function approxEqual(x: number, y: number,
-                            tolerance = SQRT_DBL_EPSILON) {
+export function approxEqual(x: number, y: number, tolerance = SQRT_DBL_EPSILON) {
     let xy = Math.abs(x - y);
     const xn = Math.abs(x);
     if (xn > tolerance) {
@@ -34,8 +33,7 @@ export function approxEqual(x: number, y: number,
     return xy < tolerance;
 }
 
-export function approxEqualArray(x: number[], y: number[],
-                                 tolerance = SQRT_DBL_EPSILON) {
+export function approxEqualArray(x: number[], y: number[], tolerance = SQRT_DBL_EPSILON) {
     if (y.length !== x.length) {
         throw Error("Incompatible arrays");
     }

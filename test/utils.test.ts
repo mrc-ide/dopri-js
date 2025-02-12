@@ -20,8 +20,7 @@ describe("approximately equal", () => {
     it("is true with identical values", () => {
         expect(utils.approxEqual(1, 1)).toBe(true);
         expect(utils.approxEqual(Math.sqrt(3), Math.sqrt(3))).toBe(true);
-        expect(utils.approxEqual(Math.pow(Math.PI, 20),
-                                 Math.pow(Math.PI, 20))).toBe(true);
+        expect(utils.approxEqual(Math.pow(Math.PI, 20), Math.pow(Math.PI, 20))).toBe(true);
     });
 
     it("is false with different values", () => {
@@ -34,7 +33,7 @@ describe("approximately equal", () => {
         expect(utils.approxEqual(Math.PI, 355 / 113, 1e-7)).toBe(true);
     });
 
-    it ("works for very small numbers", () => {
+    it("works for very small numbers", () => {
         expect(utils.approxEqual(1e-10, 1e-10)).toBe(true);
         expect(utils.approxEqual(1e-10, 1e-11)).toBe(true);
     });
@@ -70,8 +69,7 @@ describe("binary search", () => {
     it("works with simple data", () => {
         const x = utils.seqLen(0, 5, 6);
 
-        const makeCompare = (target: number) =>
-            ((el: number) => el > target);
+        const makeCompare = (target: number) => (el: number) => el > target;
 
         expect(utils.search(x, makeCompare(1.5))).toEqual(1);
         expect(utils.search(x, makeCompare(1 + 1e-10))).toEqual(1);
@@ -82,14 +80,12 @@ describe("binary search", () => {
         }
 
         expect(utils.search(x, makeCompare(-0.5))).toEqual(-1);
-        expect(utils.search(x, makeCompare(x.length + 1)))
-            .toEqual(x.length - 1);
+        expect(utils.search(x, makeCompare(x.length + 1))).toEqual(x.length - 1);
     });
 
     it("works with complex data", () => {
-        const x = utils.seqLen(0, 5, 6).map((el) => ({t: el, h: {}}));
-        const makeCompare = (target: any) =>
-            ((el: any) => el.t > target);
+        const x = utils.seqLen(0, 5, 6).map((el) => ({ t: el, h: {} }));
+        const makeCompare = (target: any) => (el: any) => el.t > target;
         expect(utils.search(x, makeCompare(1.5))).toEqual(1);
     });
 });

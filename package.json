@@ -13,7 +13,9 @@
         "test": "vitest",
         "coverage": "vitest --coverage",
         "docs": "typedoc",
-        "lint": "eslint"
+        "lint": "eslint",
+        "format-check": "npx prettier . --check",
+        "format-write": "npx prettier . --write"
     },
     "repository": {
         "type": "git",
@@ -28,6 +30,7 @@
     "devDependencies": {
         "@vitest/coverage-istanbul": "^3.0.5",
         "eslint": "^9.20.1",
+        "prettier": "^3.5.0",
         "ts-loader": "^9.3.0",
         "typedoc": "^0.23.1",
         "typescript": "^4.0.0",
@@ -35,5 +38,12 @@
         "vite": "^6.1.0",
         "vite-plugin-dts": "^4.5.0",
         "vitest": "^3.0.5"
+    },
+    "prettier": {
+        "semi": true,
+        "tabWidth": 4,
+        "singleQuote": false,
+        "printWidth": 120,
+        "trailingComma": "none"
     }
 }

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import {lorenzRhs} from "../src/examples";
-import {approxEqualArray} from "../src/utils";
+import { lorenzRhs } from "../src/examples";
+import { approxEqualArray } from "../src/utils";
 
 describe("lorenz function", () => {
     it("is correct with known cases", () => {

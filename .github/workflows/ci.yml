@@ -1,30 +1,31 @@
 # This workflow is based on the npm template: https://github.com/actions/starter-workflows/blob/main/ci/node.js.yml
 name: build-and-test
 on:
-  push:
-    branches:
-      - main
-      - master
-  pull_request:
-    branches:
-      - main
-      - master
+    push:
+        branches:
+            - main
+            - master
+    pull_request:
+        branches:
+            - main
+            - master
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
-      - run: npm ci
-      - run: npm run build
-      - run: npm install codecov -g
-      - run: npm run coverage
-      - run: npm run lint
-      - run: npm run docs
-      - uses: codecov/codecov-action@v4
-        with:
-          fail_ci_if_error: true
-          files: ./coverage/coverage-final.json
-          token: ${{ secrets.CODECOV_TOKEN }}
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 22.x
+            - run: npm ci
+            - run: npm run build
+            - run: npm install codecov -g
+            - run: npm run coverage
+            - run: npm run lint
+            - run: npm run format-check
+            - run: npm run docs
+            - uses: codecov/codecov-action@v4
+              with:
+                  fail_ci_if_error: true
+                  files: ./coverage/coverage-final.json
+                  token: ${{ secrets.CODECOV_TOKEN }}

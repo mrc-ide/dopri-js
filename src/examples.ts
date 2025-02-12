@@ -25,9 +25,8 @@ export function logisticRhs(r: number, K: number) {
     };
 }
 
-export function logisticSolution(r: number, K: number, y: number,
-                                 t: number[]) {
-    return t.map((ti: number) =>  K / (1 + (K / y - 1) * Math.exp(-r * ti)));
+export function logisticSolution(r: number, K: number, y: number, t: number[]) {
+    return t.map((ti: number) => K / (1 + (K / y - 1) * Math.exp(-r * ti)));
 }
 
 export function lorenzRhs() {

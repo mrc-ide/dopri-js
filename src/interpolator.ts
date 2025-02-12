@@ -1,7 +1,6 @@
-import {History, OutputFn, Stepper} from "./types";
+import { History, OutputFn, Stepper } from "./types";
 
-export function interpolator(history: History, stepper: Stepper,
-                             output: OutputFn) {
+export function interpolator(history: History, stepper: Stepper, output: OutputFn) {
     /**
      * This is essentially a vectorised version of {@link
      * InterpolatedSolution}, accepting a vector of times.
@@ -14,8 +13,7 @@ export function interpolator(history: History, stepper: Stepper,
     return (t: number[]) => interpolate(t, history, stepper, output);
 }
 
-function interpolate(t: number[], history: History, stepper: Stepper,
-                     output: OutputFn) {
+function interpolate(t: number[], history: History, stepper: Stepper, output: OutputFn) {
     const y: number[][] = [];
     // TODO: validate that 't' is increasing and fits within
     // integration time.
