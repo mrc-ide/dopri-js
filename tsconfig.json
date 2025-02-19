@@ -1,20 +1,13 @@
 {
     "compilerOptions": {
-        "target": "es5",
-        "module": "commonjs",
+        "target": "esnext",
+        "module": "esnext",
         "esModuleInterop": true,
-        "declaration": true,
-        "outDir": "./lib",
         "moduleResolution": "node",
+        "declaration": true,
+        "noEmit": true,
         "sourceMap": true,
         "strict": true
     },
-    "ts-node": {
-        "compilerOptions": {
-            "module": "commonjs"
-        }
-    },
-    "include": [
-        "src"
-    ]
+    "include": ["src"]
 }

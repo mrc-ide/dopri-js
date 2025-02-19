@@ -1,7 +1,7 @@
 import * as utils from "../utils";
 import * as control from "./control";
 
-import {HistoryElement, RhsFn, Stepper} from "../types";
+import { HistoryElement, RhsFn, Stepper } from "../types";
 
 // Heaps of constants!
 const C2 = 0.2;
@@ -99,61 +99,60 @@ export class Dopri5 implements Stepper {
         const hData = this.history.data;
 
         let i = 0;
-        for (i = 0; i < n; ++i) { // 22
+        for (i = 0; i < n; ++i) {
+            // 22
             yNext[i] = y[i] + h * A21 * k1[i];
         }
         this.rhs(t + C2 * h, yNext, k2);
-        for (i = 0; i < n; ++i) { // 23
+        for (i = 0; i < n; ++i) {
+            // 23
             yNext[i] = y[i] + h * (A31 * k1[i] + A32 * k2[i]);
         }
         this.rhs(t + C3 * h, yNext, k3);
-        for (i = 0; i < n; ++i) { // 24
+        for (i = 0; i < n; ++i) {
+            // 24
             yNext[i] = y[i] + h * (A41 * k1[i] + A42 * k2[i] + A43 * k3[i]);
         }
         this.rhs(t + C4 * h, yNext, k4);
-        for (i = 0; i < n; ++i) { // 25
-            yNext[i] = y[i] + h * (A51 * k1[i] + A52 * k2[i] + A53 * k3[i] +
-                                    A54 * k4[i]);
+        for (i = 0; i < n; ++i) {
+            // 25
+            yNext[i] = y[i] + h * (A51 * k1[i] + A52 * k2[i] + A53 * k3[i] + A54 * k4[i]);
         }
         this.rhs(t + C5 * h, yNext, k5);
-        for (i = 0; i < n; ++i) { // 26
-            this.yStiff[i] = y[i] + h * (A61 * k1[i] + A62 * k2[i] +
-                                          A63 * k3[i] + A64 * k4[i] +
-                                          A65 * k5[i]);
+        for (i = 0; i < n; ++i) {
+            // 26
+            this.yStiff[i] = y[i] + h * (A61 * k1[i] + A62 * k2[i] + A63 * k3[i] + A64 * k4[i] + A65 * k5[i]);
         }
         const tNext = t + h;
         this.rhs(tNext, this.yStiff, k6);
-        for (i = 0; i < n; ++i) { // 27
-            yNext[i] = y[i] + h * (A71 * k1[i] + A73 * k3[i] + A74 * k4[i] +
-                                    A75 * k5[i] + A76 * k6[i]);
+        for (i = 0; i < n; ++i) {
+            // 27
+            yNext[i] = y[i] + h * (A71 * k1[i] + A73 * k3[i] + A74 * k4[i] + A75 * k5[i] + A76 * k6[i]);
         }
         this.rhs(tNext, yNext, k2);
 
         let j = 4 * n;
         for (i = 0; i < n; ++i) {
-            hData[j++] = h * (D1 * k1[i] + D3 * k3[i] + D4 * k4[i] +
-                              D5 * k5[i] + D6 * k6[i] + D7 * k2[i]);
+            hData[j++] = h * (D1 * k1[i] + D3 * k3[i] + D4 * k4[i] + D5 * k5[i] + D6 * k6[i] + D7 * k2[i]);
         }
 
         for (i = 0; i < n; ++i) {
-            k4[i] = h * (E1 * k1[i] + E3 * k3[i] + E4 * k4[i] +
-                         E5 * k5[i] + E6 * k6[i] + E7 * k2[i]);
+            k4[i] = h * (E1 * k1[i] + E3 * k3[i] + E4 * k4[i] + E5 * k5[i] + E6 * k6[i] + E7 * k2[i]);
         }
         this.nEval += 6;
     }
 
     public stepComplete(t: number, h: number): void {
         this.saveHistory(t, h);
-        utils.copyArray(this.k1, this.k2);    // k1 <== k2
-        utils.copyArray(this.y,  this.yNext); // y  <== yNext
+        utils.copyArray(this.k1, this.k2); // k1 <== k2
+        utils.copyArray(this.y, this.yNext); // y  <== yNext
     }
 
     public error(atol: number, rtol: number): number {
         let err = 0.0;
         let i = 0;
         for (i = 0; i < this.n; ++i) {
-            const sk = atol + rtol *
-                Math.max(Math.abs(this.y[i]), Math.abs(this.yNext[i]));
+            const sk = atol + rtol * Math.max(Math.abs(this.y[i]), Math.abs(this.yNext[i]));
             err += utils.square(this.k4[i] / sk);
         }
         return Math.sqrt(err / this.n);
@@ -168,11 +167,10 @@ export class Dopri5 implements Stepper {
         const ret = new Array<number>(n);
         for (let i = 0; i < n; ++i) {
             ret[i] =
-                hData[i] + theta *
-                (hData[n + i] + theta1 *
-                 (hData[2 * n + i] + theta *
-                  (hData[3 * n + i] + theta1 *
-                   hData[4 * n + i])));
+                hData[i] +
+                theta *
+                    (hData[n + i] +
+                        theta1 * (hData[2 * n + i] + theta * (hData[3 * n + i] + theta1 * hData[4 * n + i])));
         }
         return ret;
     }
@@ -201,8 +199,8 @@ export class Dopri5 implements Stepper {
         for (let i = 0; i < n; ++i) {
             const ydiff = this.yNext[i] - this.y[i];
             const bspl = h * this.k1[i] - ydiff;
-            history.data[        i] = this.y[i];
-            history.data[    n + i] = ydiff;
+            history.data[i] = this.y[i];
+            history.data[n + i] = ydiff;
             history.data[2 * n + i] = bspl;
             history.data[3 * n + i] = -h * this.k2[i] + ydiff - bspl;
         }

@@ -1,12 +1,11 @@
-import {dopriControl, DopriControlParam} from "./control";
+import { dopriControl, DopriControlParam } from "./control";
 import * as dopri5 from "./dopri5/stepper";
-import {interpolator} from "./interpolator";
-import {History, Integrator, OutputFn, RhsFn, Stepper} from "./types";
+import { interpolator } from "./interpolator";
+import { History, Integrator, OutputFn, RhsFn, Stepper } from "./types";
 import * as utils from "./utils";
 
 // needed for ES5 - will be ~= Number.EPSILON in ES6
 const DBL_EPSILON = Math.pow(2, -52); // = 2.220446049250313e-16
-const STEP_FACTOR_MIN = 1e-4;
 
 /**
  * High-level convenience interface. Use this to create an integrator
@@ -25,10 +24,14 @@ const STEP_FACTOR_MIN = 1e-4;
  * @param output Optional output function, to compute additional
  * quantities related to the integration alongside the solution
  */
-export function integrateDopri(rhs: RhsFn, y: number[],
-                               t0: number, t1: number,
-                               control: Partial<DopriControlParam> = {},
-                               output: OutputFn = null) {
+export function integrateDopri(
+    rhs: RhsFn,
+    y: number[],
+    t0: number,
+    t1: number,
+    control: Partial<DopriControlParam> = {},
+    output: OutputFn = null
+) {
     const solver = new Dopri(rhs, y.length, control, output);
     solver.initialise(t0, y);
     return solver.run(t1);
@@ -91,9 +94,7 @@ export class Dopri implements Integrator {
      * @param output Optional output function, to compute additional
      * quantities related to the integration alongside the solution
      */
-    constructor(rhs: RhsFn, n: number,
-                control: Partial<DopriControlParam> = {},
-                output: OutputFn = null) {
+    constructor(rhs: RhsFn, n: number, control: Partial<DopriControlParam> = {}, output: OutputFn = null) {
         this._stepper = new dopri5.Dopri5(rhs, n);
         this._control = dopriControl(control);
         this._output = output;
@@ -114,9 +115,14 @@ export class Dopri implements Integrator {
         }
         this._stepper.reset(t, y);
         this._reset();
-        this._h = initialStepSize(this._stepper, t, y,
-                                  this._control.atol, this._control.rtol,
-                                  this._control.stepSizeMax);
+        this._h = initialStepSize(
+            this._stepper,
+            t,
+            y,
+            this._control.atol,
+            this._control.rtol,
+            this._control.stepSizeMax
+        );
         this._t = t;
         this._history = [];
         return this;
@@ -132,8 +138,7 @@ export class Dopri implements Integrator {
             this._step();
             this._history.push(this._stepper.history.clone());
         }
-        return interpolator(this._history.slice(0), this._stepper,
-                            this._output);
+        return interpolator(this._history.slice(0), this._stepper, this._output);
     }
 
     /**
@@ -154,7 +159,7 @@ export class Dopri implements Integrator {
             /** The number of stiff checks that were non-stiff */
             stiffNNonstiff: this._stiffNNonstiff,
             /** The number of stiff checks that were stiff */
-            stiffNStiff: this._stiffNStiff,
+            stiffNStiff: this._stiffNStiff
         };
     }
 
@@ -194,14 +199,12 @@ export class Dopri implements Integrator {
         const tcrit = this._nextTcrit();
 
         while (!success) {
-            let forceThisStep = false;
             if (this._nSteps > control.maxSteps) {
                 throw integrationError("too many steps", t);
             }
             if (h < control.stepSizeMin) {
                 if (control.stepSizeMinAllow) {
                     h = control.stepSizeMin;
-                    forceThisStep = true;
                 } else {
                     throw integrationError("step too small", t);
                 }
@@ -235,8 +238,7 @@ export class Dopri implements Integrator {
                 this._stepper.stepComplete(t, h);
 
                 let fac = fac11 / Math.pow(facOld, stepControl.beta);
-                fac = utils.constrain(fac / stepControl.factorSafe,
-                                      facc2, facc1);
+                fac = utils.constrain(fac / stepControl.factorSafe, facc2, facc1);
                 const hNew = h / fac;
 
                 this._t += h;
@@ -258,8 +260,7 @@ export class Dopri implements Integrator {
     }
 
     private _isStiff(h: number) {
-        const check = this._stiffNStiff > 0 ||
-            this._nStepsAccepted % this._control.stiffCheck === 0;
+        const check = this._stiffNStiff > 0 || this._nStepsAccepted % this._control.stiffCheck === 0;
         if (check) {
             if (this._stepper.isStiff(h)) {
                 this._stiffNNonstiff = 0;
@@ -277,8 +278,7 @@ export class Dopri implements Integrator {
     }
 }
 
-function initialStepSize(stepper: Stepper, t: number, y: number[],
-                         atol: number, rtol: number, stepSizeMax: number) {
+function initialStepSize(stepper: Stepper, t: number, y: number[], atol: number, rtol: number, stepSizeMax: number) {
     // NOTE: This is destructive with respect to most of the information
     // in the object; in particular k2, k3 will be modified.
     const f0 = new Array<number>(stepper.n);
@@ -297,10 +297,9 @@ function initialStepSize(stepper: Stepper, t: number, y: number[],
     for (i = 0; i < stepper.n; ++i) {
         const sk = atol + rtol * Math.abs(y[i]);
         normF += utils.square(f0[i] / sk);
-        normY += utils.square(y[i]  / sk);
+        normY += utils.square(y[i] / sk);
     }
-    let h = (normF <= 1e-10 || normY <= 1e-10) ?
-        1e-6 : Math.sqrt(normY / normF) * 0.01;
+    let h = normF <= 1e-10 || normY <= 1e-10 ? 1e-6 : Math.sqrt(normY / normF) * 0.01;
     h = Math.min(h, stepSizeMax);
 
     // Perform an explicit Euler step
@@ -321,9 +320,7 @@ function initialStepSize(stepper: Stepper, t: number, y: number[],
     // Step size is computed such that
     //   h^order * max(norm(f0), norm(der2)) = 0.01
     const der12 = Math.max(Math.abs(der2), Math.sqrt(normF));
-    const h1 = (der12 <= 1e-15) ?
-        Math.max(1e-6, Math.abs(h) * 1e-3) :
-        Math.pow(0.01 / der12, 1.0 / stepper.order);
+    const h1 = der12 <= 1e-15 ? Math.max(1e-6, Math.abs(h) * 1e-3) : Math.pow(0.01 / der12, 1.0 / stepper.order);
     h = Math.min(Math.min(100 * Math.abs(h), h1), stepSizeMax);
     return h;
 }

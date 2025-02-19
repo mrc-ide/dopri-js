@@ -1,6 +1,6 @@
-import {History, HistoryElement} from "./history";
-import * as interpolator from "./interpolator";
-export {History, HistoryElement};
+import { History, HistoryElement } from "./history";
+export type { History };
+export { HistoryElement };
 
 /**
  * The function type for ODE right-hand-side functions, passed through
@@ -116,8 +116,7 @@ export type InterpolatedSolution = (t: number) => number[];
  * use this function to look up the solution at some point in the
  * past.
  */
-export type RhsFnDelayed = (t: number, y: number[], dy: number[],
-                            solution: InterpolatedSolution) => void;
+export type RhsFnDelayed = (t: number, y: number[], dy: number[], solution: InterpolatedSolution) => void;
 
 /**
  * The function type for computing additional quantities based on the
@@ -136,6 +135,4 @@ export type RhsFnDelayed = (t: number, y: number[], dy: number[],
  * use this function to look up the solution at some point in the
  * past.
  */
-export type OutputFnDelayed =
-    null |
-    ((t: number, y: number[], solution: InterpolatedSolution) => number[]);
+export type OutputFnDelayed = null | ((t: number, y: number[], solution: InterpolatedSolution) => number[]);
