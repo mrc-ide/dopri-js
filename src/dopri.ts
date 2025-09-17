@@ -71,6 +71,7 @@ export class Dopri implements Integrator {
     private _control: DopriControlParam;
     private _output: OutputFn;
     private _t: number = 0.0;
+    private _tStart: number = 0.0;
     private _h: number = 0.0;
 
     // state
@@ -108,7 +109,7 @@ export class Dopri implements Integrator {
      *
      * @param y The initial conditions
      */
-    public initialise(t: number, y: number[]): Dopri {
+    public initialise(t: number, y: number[], history?: History): Dopri {
         const n = this._stepper.n;
         if (y.length !== n) {
             throw Error(`Invalid size 'y' - expected a length ${n} array`);
@@ -124,9 +125,12 @@ export class Dopri implements Integrator {
             this._control.stepSizeMax
         );
         this._t = t;
-        this._history = [];
+        this._tStart = t;
+        this._history = history || [];
         return this;
     }
+
+    public getNewHistory() { return this._history.filter(el => el.t > this._tStart) }
 
     /**
      * Integrate the solution through to some time

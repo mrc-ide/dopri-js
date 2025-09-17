@@ -1,6 +1,6 @@
 import { DopriControlParam } from "./control";
 import { Dopri } from "./dopri";
-import { HistoryElement, OutputFnDelayed, RhsFnDelayed } from "./types";
+import { History, HistoryElement, OutputFnDelayed, RhsFnDelayed } from "./types";
 import { search } from "./utils";
 
 /** {@inheritDoc integrateDopri} */
@@ -36,9 +36,9 @@ export class DDE extends Dopri {
         this._y0 = new Array<number>(n);
     }
 
-    public initialise(t: number, y: number[]): DDE {
+    public initialise(t: number, y: number[], history?: History): DDE {
         this._y0 = y;
-        super.initialise(t, y);
+        super.initialise(t, y, history);
         return this;
     }
 

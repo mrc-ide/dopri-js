@@ -18,6 +18,23 @@ describe("validate initial conditions", () => {
     });
 });
 
+describe("history interface", () => {
+    const solver = new dopri.Dopri(examples.lorenzRhs(), 3);
+    it("returns only new history", () => {
+        const stateT0 = [1, 1, 1];
+        solver.initialise(0, stateT0);
+        const solution = solver.run(1);
+        const stateT1 = solution([1])[0];
+        const historyT0T1 = solver.getNewHistory();
+
+        solver.initialise(1, stateT1, historyT0T1);
+        solver.run(2);
+        const historyT1T2 = solver.getNewHistory();
+
+        historyT1T2.forEach(history => expect(history.t).toBeGreaterThan(1));
+    });
+});
+
 describe("integrate exponential", () => {
     it("works for 1d problems", () => {
         const y0 = [1];
