@@ -130,7 +130,9 @@ export class Dopri implements Integrator {
         return this;
     }
 
-    public getNewHistory() { return this._history.filter(el => el.t > this._tStart) }
+    public getNewHistory() {
+        return this._history.filter((el) => el.t > this._tStart);
+    }
 
     /**
      * Integrate the solution through to some time

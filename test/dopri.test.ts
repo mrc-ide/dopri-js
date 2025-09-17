@@ -31,7 +31,7 @@ describe("history interface", () => {
         solver.run(2);
         const historyT1T2 = solver.getNewHistory();
 
-        historyT1T2.forEach(history => expect(history.t).toBeGreaterThan(1));
+        historyT1T2.forEach((history) => expect(history.t).toBeGreaterThan(1));
     });
 });
 
