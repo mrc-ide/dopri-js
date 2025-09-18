@@ -84,4 +84,30 @@ describe("Delay differential equations", () => {
         expect(utils.approxEqualArray(extract(ySol, 0), extract(cmp, 0))).toEqual(true);
         expect(utils.approxEqualArray(extract(ySol, 1), extract(cmp, 1))).toEqual(true);
     });
+
+    it("Can use past history for ddes", () => {
+        const y0 = [0, 0];
+        const rhs = function (t: number, y: number[], dydt: number[], solution: any) {
+            dydt[0] = 1;
+        };
+        const out = (t: number, y: number[], solution: any) => solution(t - 1);
+        const solver = new dde.DDE(rhs, 1, {}, out);
+
+        solver.initialise(0, y0.slice(0, 1));
+        const solution0to1 = solver.run(1);
+        const history0to1 = solver.getHistory();
+
+        const y1 = solution0to1([1])[0];
+        solver.initialise(1, y1.slice(0, 1), history0to1);
+        const solution1to2 = solver.run(2);
+        Array.from({ length: 10 }, (_, i) => (i + 10) / 10).forEach((t) => {
+            // value from the out function defined above which is delayed by 1
+            const delayedValue = solution1to2([t])[0][1];
+
+            // value from actual 0 to 1 solution
+            const actualPastValue = solution0to1([t - 1])[0][0];
+
+            expect(delayedValue).toBeCloseTo(actualPastValue);
+        });
+    });
 });

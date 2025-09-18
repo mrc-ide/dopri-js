@@ -18,17 +18,6 @@ describe("validate initial conditions", () => {
     });
 });
 
-describe("history interface", () => {
-    const solver = new dopri.Dopri(examples.lorenzRhs(), 3);
-    it("can get history", () => {
-        expect(() => {
-            solver.initialise(0, [1, 1, 1]);
-            solver.run(1);
-            solver.getHistory();
-        }).not.toThrow();
-    });
-});
-
 describe("integrate exponential", () => {
     it("works for 1d problems", () => {
         const y0 = [1];
