@@ -71,7 +71,6 @@ export class Dopri implements Integrator {
     private _control: DopriControlParam;
     private _output: OutputFn;
     private _t: number = 0.0;
-    private _tStart: number = 0.0;
     private _h: number = 0.0;
 
     // state
@@ -125,7 +124,6 @@ export class Dopri implements Integrator {
             this._control.stepSizeMax
         );
         this._t = t;
-        this._tStart = t;
         this._history = [];
         return this;
     }
