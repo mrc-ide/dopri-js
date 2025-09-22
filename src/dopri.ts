@@ -128,6 +128,10 @@ export class Dopri implements Integrator {
         return this;
     }
 
+    public getHistory() {
+        return this._history;
+    }
+
     /**
      * Integrate the solution through to some time
      *

@@ -1,6 +1,6 @@
 import { DopriControlParam } from "./control";
 import { Dopri } from "./dopri";
-import { HistoryElement, OutputFnDelayed, RhsFnDelayed } from "./types";
+import { History, HistoryElement, OutputFnDelayed, RhsFnDelayed } from "./types";
 import { search } from "./utils";
 
 /** {@inheritDoc integrateDopri} */
@@ -23,6 +23,8 @@ export function integrateDDE(
  */
 export class DDE extends Dopri {
     private _y0: number[];
+    private _pastHistory: History = [];
+
     constructor(
         rhs: RhsFnDelayed,
         n: number,
@@ -36,22 +38,24 @@ export class DDE extends Dopri {
         this._y0 = new Array<number>(n);
     }
 
-    public initialise(t: number, y: number[]): DDE {
+    public initialise(t: number, y: number[], pastHistory?: History): DDE {
         this._y0 = y;
+        this._pastHistory = pastHistory || [];
         super.initialise(t, y);
         return this;
     }
 
     private _interpolate(t: number): number[] {
-        const i = this._findHistory(t);
+        const fullHistory = this._pastHistory.concat(this._history);
+        const i = this._findHistory(t, fullHistory);
         if (i < 0) {
             return this._y0.slice(0);
         } else {
-            return this._stepper.interpolate(t, this._history[i]);
+            return this._stepper.interpolate(t, fullHistory[i]);
         }
     }
 
-    private _findHistory(t: number): number {
-        return search(this._history, (el: HistoryElement) => el.t > t);
+    private _findHistory(t: number, history: History): number {
+        return search(history, (el: HistoryElement) => el.t > t);
     }
 }
