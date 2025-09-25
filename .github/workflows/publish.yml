@@ -1,3 +1,5 @@
+# workflow follows example in
+# https://docs.github.com/en/actions/tutorials/publish-packages/publish-nodejs-packages#publishing-packages-to-the-npm-registry
 name: Publish Package to npmjs
 on:
     release:
@@ -17,6 +19,8 @@ jobs:
                   registry-url: "https://registry.npmjs.org"
             - run: npm ci
             - run: npm run build
+              
+              # https://docs.npmjs.com/cli/v11/commands/npm-publish
             - run: npm publish --provenance --access public
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
