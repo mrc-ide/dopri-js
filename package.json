@@ -1,5 +1,5 @@
 {
-    "name": "dopri",
+    "name": "@reside-ic/dopri",
     "version": "1.0.0",
     "description": "Dormand–Prince methods",
     "main": "dist/dopri.js",
