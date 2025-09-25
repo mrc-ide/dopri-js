@@ -1,6 +1,6 @@
 {
     "name": "@reside-ic/dopri",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Dormand–Prince methods",
     "main": "dist/dopri.js",
     "type": "module",
