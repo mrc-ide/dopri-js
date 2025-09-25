@@ -2,8 +2,6 @@ name: Publish Package to npmjs
 on:
     release:
         types: [published]
-    pull_request:
-        branch: npm-publish-on-release
 jobs:
     build:
         runs-on: ubuntu-latest
